@@ -59,7 +59,6 @@
     align-items: center; justify-content: center; position: relative;
   }
 
-  /* 衣服物件背景統一化，避免顏色干擾形狀判斷 */
   #item-display {
     width: 130px; height: 130px; border-radius: 24px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -114,7 +113,7 @@
   <div id="start-screen">
     <div class="start-title">家事達人：衣物分類</div>
     <div class="start-desc">
-      👕 遊戲說明 褲<br><br>
+      👕 遊戲說明 👚<br><br>
       畫面會隨機出現上衣或褲子。<br>
       請仔細閱讀上方的「分類規則」，<br>
       並將衣物投入正確的洗衣籃中。<br><br>
@@ -177,9 +176,6 @@
 </div>
 
 <script>
-/**
- * 核心醫療遊戲狀態機
- */
 let gs = {
   playerName: '',
   playerAge: '',
@@ -198,7 +194,6 @@ let gs = {
   }
 };
 
-// 重新定義物理類別題庫
 const CLOTHES = {
   top: { type: 'top', emojis: ['👕', '👔', '🧥'] },
   bottom: { type: 'bottom', emojis: ['👖', '🩳'] }
@@ -238,15 +233,18 @@ function gameTick() {
   gs.timer++;
   document.getElementById('dbg-timer').innerText = gs.timer;
 
+  // 階段切換時，強制呼叫 spawnItem() 刷新題目，消除舊規則殘留的時間差
   if (gs.timer === 20 && gs.phase === 1) {
     gs.phase = 2;
     gs.waitingForReconfig = true;
     applyPhaseRules();
+    spawnItem(); 
   } 
   else if (gs.timer === 40 && gs.phase === 2) {
     gs.phase = 3;
     gs.waitingForReconfig = true; 
     applyPhaseRules();
+    spawnItem(); 
   }
   else if (gs.timer >= 60) {
     endGame();
@@ -301,7 +299,7 @@ function spawnItem() {
 function determineCorrectBin(itemType) {
   if (itemType === 'sock') return 'trash';
   if (gs.phase === 1) return itemType === 'top' ? 'left' : 'right';
-  return itemType === 'top' ? 'right' : 'left'; // Phase 2 & 3 反轉
+  return itemType === 'top' ? 'right' : 'left'; 
 }
 
 function handleBinClick(binId) {
