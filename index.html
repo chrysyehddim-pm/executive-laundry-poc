@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>家事達人：智慧洗衣 (執行力評估)</title>
+<title>家事達人的一天 (執行力認知評估)</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
   
@@ -11,7 +11,7 @@
   
   body { 
     font-family: 'Noto Sans TC', sans-serif; 
-    background-color: #0f172a; /* 桌面端深色背景 */
+    background-color: #0f172a; 
     display: flex; justify-content: center; align-items: center; 
     min-height: 100vh; overflow: hidden; color: #e8f5e8;
   }
@@ -19,14 +19,14 @@
   /* RWD 手機版型容器 */
   #app-container {
     position: relative; 
-    width: 100%; max-width: 430px; /* 貼近 iPhone Pro Max 寬度 */
+    width: 100%; max-width: 430px; 
     height: 100vh; max-height: 900px;
     display: flex; flex-direction: column; 
     background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
     box-shadow: 0 0 40px rgba(0,0,0,0.8); overflow: hidden;
   }
 
-  /* ===== 共用 UI 元件 ===== */
+  /* 共用 UI 元件 */
   .screen {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     display: none; flex-direction: column; background: transparent; z-index: 10;
@@ -36,12 +36,12 @@
   .btn {
     background: #10b981; color: #fff; font-size: 18px; font-weight: 700;
     padding: 16px 24px; border: none; border-radius: 16px; cursor: pointer;
-    box-shadow: 0 8px 0 #059669; transition: all 0.1s; touch-action: manipulation;
+    box-shadow: 0 6px 0 #059669; transition: all 0.1s; touch-action: manipulation;
     width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
   }
-  .btn:active { transform: translateY(8px); box-shadow: 0 0 0 #059669; }
+  .btn:active { transform: translateY(6px); box-shadow: 0 0 0 #059669; }
 
-  /* ===== 首頁 (Level 選單) ===== */
+  /* 首頁 (Level 選單) */
   #home-screen { padding: 40px 24px; overflow-y: auto; }
   .home-title { font-size: 32px; color: #10b981; font-weight: 900; margin-bottom: 8px; line-height: 1.2; }
   .home-desc { font-size: 15px; color: #94a3b8; margin-bottom: 32px; }
@@ -56,77 +56,78 @@
   .lv-title { font-size: 18px; font-weight: 700; color: #f8fafc; }
   .lv-desc { font-size: 14px; color: #94a3b8; line-height: 1.4; }
 
-  /* ===== 遊戲畫面 ===== */
+  /* 遊戲畫面 */
   #header {
     padding: 24px 20px 16px; background: rgba(15, 23, 42, 0.9);
     border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; z-index: 20;
   }
   #progress-bar { width: 100%; height: 6px; background: #334155; border-radius: 4px; margin-bottom: 16px; overflow: hidden; }
   #progress-fill { height: 100%; background: #10b981; width: 0%; transition: width 0.3s ease; }
-  
   #instruction { font-size: 20px; font-weight: 900; line-height: 1.4; min-height: 56px; display: flex; align-items: center; justify-content: center; }
-  .hl-left { color: #38bdf8; }
-  .hl-right { color: #fbbf24; }
-  .hl-alert { color: #f43f5e; }
 
   #game-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
   
-  /* 衣服展示區 */
+  /* 任務物件展示區 */
   #item-display {
-    width: 140px; height: 140px; border-radius: 32px;
+    width: 150px; height: 150px; border-radius: 32px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     font-size: 80px; background: #fff; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-    border: 4px solid #e2e8f0; transition: transform 0.2s, opacity 0.2s;
+    border: 4px solid #e2e8f0; transition: transform 0.2s, opacity 0.2s; position: relative;
   }
   
+  /* L1 專用：高對比底色，消弭 Emoji 色差 */
+  .bg-dark { background: #334155 !important; border-color: #1e293b !important; }
+  .bg-light { background: #f8fafc !important; border-color: #e2e8f0 !important; }
+
   @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-12px) rotate(-8deg); } 75% { transform: translateX(12px) rotate(8deg); } }
   .shake-error { animation: shake 0.3s ease-in-out; border-color: #f43f5e !important; }
   .success-pop { transform: scale(0.5) translateY(100px) !important; opacity: 0; }
 
-  /* 底部籃子區 (符合大拇指熱區) */
-  #bins-container {
-    display: flex; justify-content: space-between; gap: 12px;
-    padding: 20px 20px 40px; background: rgba(0,0,0,0.3); backdrop-filter: blur(10px);
-  }
-  .bin {
-    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 20px 10px; border-radius: 24px; background: rgba(255,255,255,0.05);
-    border: 2px solid rgba(255,255,255,0.1); cursor: pointer; transition: all 0.1s; touch-action: manipulation;
-  }
-  .bin:active { transform: scale(0.92); background: rgba(255,255,255,0.15); border-color: #10b981; }
-  .bin-icon { font-size: 40px; margin-bottom: 8px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); }
-  .bin-label { font-size: 15px; font-weight: 700; color: #cbd5e1; text-align: center; }
-
-  /* 廣播打斷與掉落事件 UI */
+  /* L3 廣播與 L5 並行任務 UI */
   .overlay-alert {
-    position: absolute; top: 30%; left: 10%; width: 80%;
-    background: rgba(244, 63, 94, 0.95); padding: 24px; border-radius: 24px;
-    text-align: center; font-weight: 900; font-size: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    position: absolute; top: 15%; left: 10%; width: 80%;
+    background: rgba(244, 63, 94, 0.95); padding: 20px; border-radius: 20px;
+    text-align: center; font-weight: 900; font-size: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
     transform: scale(0); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 100;
   }
   .overlay-alert.show { transform: scale(1); }
 
-  #catch-btn {
-    position: absolute; bottom: 200px; right: 20px;
-    background: #f59e0b; padding: 16px 24px; border-radius: 50px;
-    font-size: 18px; font-weight: 900; box-shadow: 0 8px 0 #b45309;
-    transform: scale(0); transition: transform 0.2s; z-index: 50; display: flex; gap: 8px; align-items: center;
+  #parallel-task {
+    position: absolute; top: 20px; right: 20px;
+    background: #f59e0b; padding: 12px 20px; border-radius: 20px;
+    font-size: 16px; font-weight: 900; box-shadow: 0 6px 0 #b45309;
+    transform: scale(0); transition: transform 0.2s; z-index: 50; display: flex; flex-direction: column; align-items: center; cursor: pointer;
   }
-  #catch-btn.show { transform: scale(1); animation: float 2s infinite ease-in-out; }
-  @keyframes float { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-10px) scale(1.05); } }
+  #parallel-task.show { transform: scale(1); animation: shakeBoil 0.5s infinite ease-in-out; }
+  @keyframes shakeBoil { 0%, 100% { transform: scale(1) rotate(0deg); } 25% { transform: scale(1.05) rotate(-5deg); } 75% { transform: scale(1.05) rotate(5deg); } }
 
-  /* ===== 結算畫面 ===== */
+  /* 底部籃子區 (動態 Grid) */
+  #bins-container {
+    padding: 20px 20px 40px; background: rgba(0,0,0,0.3); backdrop-filter: blur(10px);
+    display: grid; gap: 12px;
+  }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-4 { grid-template-columns: 1fr 1fr; } /* 2x2 排列，適合 L2 */
+
+  .bin {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 16px 10px; border-radius: 20px; background: rgba(255,255,255,0.05);
+    border: 2px solid rgba(255,255,255,0.1); cursor: pointer; transition: all 0.1s; touch-action: manipulation;
+  }
+  .bin:active { transform: scale(0.92); background: rgba(255,255,255,0.15); border-color: #10b981; }
+  .bin-icon { font-size: 36px; margin-bottom: 8px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); }
+  .bin-label { font-size: 14px; font-weight: 700; color: #cbd5e1; text-align: center; }
+
+  /* 結算畫面 */
   #result-screen { padding: 40px 24px; justify-content: center; }
   .result-box { background: rgba(255,255,255,0.05); border-radius: 32px; padding: 32px 24px; text-align: center; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.1); }
   .res-emoji { font-size: 70px; margin-bottom: 16px; }
   .res-title { font-size: 28px; font-weight: 900; color: #10b981; margin-bottom: 8px; }
-  .res-subtitle { font-size: 16px; color: #94a3b8; margin-bottom: 32px; }
   
-  .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; text-align: left; margin-bottom: 32px; }
+  .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; text-align: left; margin-bottom: 32px; margin-top: 24px;}
   .metric-item { background: rgba(0,0,0,0.2); padding: 16px; border-radius: 16px; }
   .m-label { font-size: 12px; color: #94a3b8; margin-bottom: 4px; }
   .m-val { font-size: 20px; font-weight: 900; color: #f8fafc; font-family: monospace; }
-  
 </style>
 </head>
 <body>
@@ -134,33 +135,28 @@
 <div id="app-container">
 
   <div id="home-screen" class="screen active">
-    <div class="home-title">家事達人：<br>智慧洗衣</div>
-    <div class="home-desc">請選擇符合您評估需求的難度等級。每局固定 10 件衣物，無時間壓力。</div>
+    <div class="home-title">家事達人的一天</div>
+    <div class="home-desc">請選擇情境。每局固定 10 件家事，無時間壓力。</div>
     
     <div class="level-card" onclick="startGame(1)">
-      <div class="lv-badge">L1 暖身</div>
-      <div class="lv-title">單一維度分類 (顏色)</div>
-      <div class="lv-desc">深淺分類，測量基礎處理反應時間。</div>
+      <div class="lv-badge">L1 晨間洗衣</div>
+      <div class="lv-title">深淺分類 (基礎反應)</div>
     </div>
     <div class="level-card" onclick="startGame(2)">
-      <div class="lv-badge">L2 基礎</div>
-      <div class="lv-title">工作記憶負荷 (款式)</div>
-      <div class="lv-desc">依款式丟入三個收納籃，考驗暫存記憶。</div>
+      <div class="lv-badge">L2 午後收衣</div>
+      <div class="lv-title">衣物歸位 (工作記憶)</div>
     </div>
     <div class="level-card" onclick="startGame(3)">
-      <div class="lv-badge">L3 標準</div>
-      <div class="lv-title">規則突變 (認知彈性)</div>
-      <div class="lv-desc">中途強制改變分類規則，測量大腦切換成本。</div>
+      <div class="lv-badge">L3 冰箱收納</div>
+      <div class="lv-title">生鮮分類 (認知彈性)</div>
     </div>
     <div class="level-card" onclick="startGame(4)">
-      <div class="lv-badge">L4 進階</div>
-      <div class="lv-title">衣物檢查 (抑制控制)</div>
-      <div class="lv-desc">加入廢棄物誘餌，測量煞車與衝動克制能力。</div>
+      <div class="lv-badge">L4 挑菜洗菜</div>
+      <div class="lv-title">挑除爛葉 (抑制控制)</div>
     </div>
     <div class="level-card" onclick="startGame(5)">
-      <div class="lv-badge">L5 極限</div>
-      <div class="lv-title">家事並行 (分配性注意力)</div>
-      <div class="lv-desc">分類時須同時處理突發掉落物，測量多工效能。</div>
+      <div class="lv-badge">L5 顧火擺盤</div>
+      <div class="lv-title">沸騰關火 (分配注意力)</div>
     </div>
   </div>
 
@@ -173,53 +169,30 @@
     <div id="game-area">
       <div id="item-display"><div id="item-emoji">👕</div></div>
       
-      <div id="rule-alert" class="overlay-alert">⚠️ 廣播：規則改變！<br><span style="font-size:18px; font-weight:400; margin-top:8px; display:block;">請依照新指示操作</span></div>
+      <div id="rule-alert" class="overlay-alert">⚠️ 哎呀記錯了！<br><span id="rule-alert-msg" style="font-size:16px; font-weight:400; margin-top:8px; display:block;">規則反轉</span></div>
       
-      <div id="catch-btn" onclick="handleCatch()"><span style="font-size: 24px;">🧥</span> 掉落！快接住</div>
+      <div id="parallel-task" onclick="handleParallelTask()">
+        <span style="font-size: 32px;">🥘</span>
+        <span style="font-size: 14px; margin-top: 4px;">快關小火</span>
+      </div>
     </div>
 
-    <div id="bins-container">
-      <div class="bin" id="bin-left" onclick="handleBinTap('left')">
-        <div class="bin-icon" id="icon-left">🧺</div>
-        <div class="bin-label" id="label-left">選項 A</div>
-      </div>
-      <div class="bin" id="bin-mid" onclick="handleBinTap('mid')">
-        <div class="bin-icon" id="icon-mid">🗑️</div>
-        <div class="bin-label" id="label-mid" style="color: #f43f5e;">垃圾桶</div>
-      </div>
-      <div class="bin" id="bin-right" onclick="handleBinTap('right')">
-        <div class="bin-icon" id="icon-right">🧺</div>
-        <div class="bin-label" id="label-right">選項 B</div>
-      </div>
-    </div>
+    <div id="bins-container"></div>
   </div>
 
   <div id="result-screen" class="screen">
     <div class="result-box">
       <div class="res-emoji">🎉</div>
       <div class="res-title">家事達人！</div>
-      <div class="res-subtitle">您順利完成了 10 件衣物的整理作業。</div>
       
       <div class="metric-grid">
-        <div class="metric-item">
-          <div class="m-label">處理反應時間</div>
-          <div class="m-val"><span id="res-planning">0</span> <span style="font-size:12px;color:#94a3b8">ms</span></div>
-        </div>
-        <div class="metric-item">
-          <div class="m-label">衝動誤點次數</div>
-          <div class="m-val"><span id="res-commission">0</span> <span style="font-size:12px;color:#94a3b8">次</span></div>
-        </div>
-        <div class="metric-item">
-          <div class="m-label">切換停頓時間</div>
-          <div class="m-val"><span id="res-reconfig">N/A</span> <span style="font-size:12px;color:#94a3b8">ms</span></div>
-        </div>
-        <div class="metric-item">
-          <div class="m-label">無效盲動次數</div>
-          <div class="m-val"><span id="res-redundant">0</span> <span style="font-size:12px;color:#94a3b8">次</span></div>
-        </div>
+        <div class="metric-item"><div class="m-label">處理反應時間</div><div class="m-val"><span id="res-planning">0</span> <span style="font-size:12px">ms</span></div></div>
+        <div class="metric-item"><div class="m-label">衝動誤點 (煞車失敗)</div><div class="m-val"><span id="res-commission">0</span> <span style="font-size:12px">次</span></div></div>
+        <div class="metric-item"><div class="m-label">切換停頓時間</div><div class="m-val"><span id="res-reconfig">N/A</span> <span style="font-size:12px">ms</span></div></div>
+        <div class="metric-item"><div class="m-label">無效盲動次數</div><div class="m-val"><span id="res-redundant">0</span> <span style="font-size:12px">次</span></div></div>
       </div>
       
-      <button class="btn" onclick="showScreen('home-screen')">返回難度選單</button>
+      <button class="btn" onclick="showScreen('home-screen')">返回情境選單</button>
     </div>
   </div>
 
@@ -227,27 +200,84 @@
 
 <script>
 /**
- * 核心引擎：API 與狀態管理
+ * 核心引擎：參數設定與狀態管理
  */
-const ITEMS = {
-  dark: ['🧥', '👖', '👔'], light: ['👕', '🩲'], top: ['👕', '🧥', '👔'], bottom: ['👖', '🩲'], sock: ['🧦']
-};
 const TOTAL_ITEMS = 10;
 
-let gs = {
-  level: 1, currentCount: 0, isLocked: false,
-  currentItem: { emoji: '', category: '', correctBin: '' },
-  itemSpawnTime: 0, 
-  waitingForReconfig: false, // L3 切換標記
-  isCatching: false,         // L5 掉落標記
-  metrics: {
-    latencies: [], reconfigLatency: null, commission: 0, redundant: 0
+// 五階情境設定檔
+const LEVEL_CONFIGS = {
+  1: {
+    inst: "請將衣服依<span style='color:#38bdf8'>深淺色</span>丟入洗衣機",
+    bins: [ { id: 'dark', icon: '🎛️', label: '深色機' }, { id: 'light', icon: '🎛️', label: '淺色機' } ],
+    gridClass: 'grid-2',
+    generate: () => {
+      const isDark = Math.random() > 0.5;
+      return { 
+        emoji: ['👕','👖','🧥'][Math.floor(Math.random()*3)], 
+        correctBin: isDark ? 'dark' : 'light',
+        cssClass: isDark ? 'bg-dark' : 'bg-light' 
+      };
+    }
+  },
+  2: {
+    inst: "收衣服囉！請將衣物放進對應<span style='color:#38bdf8'>收納籃</span>",
+    bins: [ 
+      { id: 'top', icon: '🧺', label: '上衣' }, { id: 'bottom', icon: '🧺', label: '褲子' },
+      { id: 'sock', icon: '🧺', label: '襪子' }, { id: 'underwear', icon: '🧺', label: '內衣褲' }
+    ],
+    gridClass: 'grid-4',
+    generate: () => {
+      const types = [
+        { type: 'top', emojis: ['👕','🧥','👔'] }, { type: 'bottom', emojis: ['👖','🩳'] },
+        { type: 'sock', emojis: ['🧦'] }, { type: 'underwear', emojis: ['🩲'] }
+      ];
+      const selected = types[Math.floor(Math.random() * types.length)];
+      return { emoji: selected.emojis[Math.floor(Math.random() * selected.emojis.length)], correctBin: selected.type, cssClass: '' };
+    }
+  },
+  3: {
+    inst: "蔬菜放<span style='color:#38bdf8'>上層</span>，肉類放<span style='color:#fbbf24'>下層</span>",
+    bins: [ { id: 'veg', icon: '🧊', label: '上層 (蔬菜)' }, { id: 'meat', icon: '🧊', label: '下層 (肉類)' } ],
+    gridClass: 'grid-2',
+    generate: (state) => {
+      const isVeg = Math.random() > 0.5;
+      const emoji = isVeg ? ['🥦','🥬','🥕'][Math.floor(Math.random()*3)] : ['🥩','🍗','🥓'][Math.floor(Math.random()*3)];
+      // 反轉邏輯：過半後互換
+      let correctBin = isVeg ? 'veg' : 'meat';
+      if (state.currentCount >= 5) correctBin = isVeg ? 'meat' : 'veg';
+      return { emoji, correctBin, cssClass: '' };
+    }
+  },
+  4: {
+    inst: "健康蔬菜放<span style='color:#38bdf8'>洗菜盆</span>，蟲或枯葉丟<span style='color:#f43f5e'>垃圾桶</span>！",
+    bins: [ { id: 'good', icon: '🥣', label: '洗菜盆' }, { id: 'bad', icon: '🗑️', label: '垃圾桶' } ],
+    gridClass: 'grid-2',
+    generate: () => {
+      const isBad = Math.random() > 0.7; // 30% 機率出現誘餌
+      const emoji = isBad ? ['🐛','🍂'][Math.floor(Math.random()*2)] : ['🥬','🥦'][Math.floor(Math.random()*2)];
+      return { emoji, correctBin: isBad ? 'bad' : 'good', cssClass: '' };
+    }
+  },
+  5: {
+    inst: "請將餐具放上餐桌，並隨時注意<span style='color:#f43f5e'>湯鍋沸騰</span>！",
+    bins: [ { id: 'bowl', icon: '🗄️', label: '放碗' }, { id: 'plate', icon: '🗄️', label: '放盤子' } ],
+    gridClass: 'grid-2',
+    generate: () => {
+      const isBowl = Math.random() > 0.5;
+      return { emoji: isBowl ? '🥣' : '🍽️', correctBin: isBowl ? 'bowl' : 'plate', cssClass: '' };
+    }
   }
 };
 
+let gs = {
+  level: 1, currentCount: 0, isLocked: false, currentItem: {}, itemSpawnTime: 0,
+  waitingForReconfig: false, isBoiling: false,
+  metrics: { latencies: [], reconfigLatency: null, commission: 0, redundant: 0 }
+};
+
 const elItem = document.getElementById('item-display');
-const elEmoji = document.getElementById('item-emoji');
 const elInst = document.getElementById('instruction');
+const elBins = document.getElementById('bins-container');
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -255,52 +285,39 @@ function showScreen(id) {
 }
 
 /**
- * 啟動遊戲與難度佈局
+ * 啟動遊戲與佈局初始化
  */
 function startGame(level) {
   gs = {
     level: level, currentCount: 0, isLocked: false, currentItem: {}, itemSpawnTime: 0,
-    waitingForReconfig: false, isCatching: false,
+    waitingForReconfig: false, isBoiling: false,
     metrics: { latencies: [], reconfigLatency: null, commission: 0, redundant: 0 }
   };
   
   document.getElementById('progress-fill').style.width = '0%';
   document.getElementById('rule-alert').classList.remove('show');
-  document.getElementById('catch-btn').classList.remove('show');
+  document.getElementById('parallel-task').classList.remove('show');
   
-  applyLevelUI();
+  renderBins();
+  elInst.innerHTML = LEVEL_CONFIGS[level].inst;
+  
   showScreen('game-screen');
-  setTimeout(spawnNextItem, 500); // 緩衝後出題
+  setTimeout(spawnNextItem, 600);
+}
+
+function renderBins() {
+  const config = LEVEL_CONFIGS[gs.level];
+  elBins.className = config.gridClass;
+  elBins.innerHTML = config.bins.map(b => `
+    <div class="bin" id="bin-${b.id}" onclick="handleBinTap('${b.id}')">
+      <div class="bin-icon">${b.icon}</div>
+      <div class="bin-label" id="label-${b.id}">${b.label}</div>
+    </div>
+  `).join('');
 }
 
 /**
- * 依據難度設定 UI 與指示
- */
-function applyLevelUI() {
-  const midBin = document.getElementById('bin-mid');
-  
-  if (gs.level === 1) {
-    elInst.innerHTML = "<span class='hl-left'>深色</span>放左，<span class='hl-right'>淺色</span>放右";
-    document.getElementById('label-left').innerText = "深色機"; document.getElementById('label-right').innerText = "淺色機";
-    midBin.style.display = 'none'; // L1 不需要垃圾桶
-  } else if (gs.level >= 2) {
-    midBin.style.display = 'flex';
-    document.getElementById('icon-left').innerText = "👕"; document.getElementById('icon-right').innerText = "👖";
-    document.getElementById('label-mid').innerText = "襪子丟棄";
-    
-    // L3 後半段反轉規則
-    if (gs.level === 3 && gs.currentCount >= 5) {
-      elInst.innerHTML = "<span class='hl-alert'>反轉：</span>上衣放<span class='hl-right'>右</span>，褲子放<span class='hl-left'>左</span>";
-      document.getElementById('label-left').innerText = "褲子籃"; document.getElementById('label-right').innerText = "上衣籃";
-    } else {
-      elInst.innerHTML = "依<span class='hl-left'>上衣</span>或<span class='hl-right'>褲子</span>放入對應籃子";
-      document.getElementById('label-left').innerText = "上衣籃"; document.getElementById('label-right').innerText = "褲子籃";
-    }
-  }
-}
-
-/**
- * 產生下一件物品
+ * 產生下一件物品與事件觸發
  */
 function spawnNextItem() {
   if (gs.currentCount >= TOTAL_ITEMS) return endGame();
@@ -310,62 +327,52 @@ function spawnNextItem() {
   // L3 規則切換觸發 (剛好到達第 5 件時)
   if (gs.level === 3 && gs.currentCount === 5 && !gs.waitingForReconfig) {
     gs.waitingForReconfig = true;
+    document.getElementById('rule-alert-msg').innerText = "蔬菜改放下層，肉類改放上層！";
     document.getElementById('rule-alert').classList.add('show');
+    
     setTimeout(() => { 
       document.getElementById('rule-alert').classList.remove('show');
-      applyLevelUI();
-      generateItemLogic(); // 廣播結束後才出題
-    }, 2000);
+      // 動態更新 UI 標籤
+      document.getElementById('label-veg').innerText = "下層 (蔬菜)";
+      document.getElementById('label-meat').innerText = "上層 (肉類)";
+      elInst.innerHTML = "蔬菜放<span style='color:#fbbf24'>下層</span>，肉類放<span style='color:#38bdf8'>上層</span>";
+      
+      generateAndRender(); 
+    }, 2500);
     return;
   }
 
-  // L5 突發掉落事件 (隨機 30% 機率，且不在切換時發生)
+  // L5 突發顧火事件 (隨機 30% 機率)
   if (gs.level === 5 && Math.random() > 0.7 && gs.currentCount > 0) {
-    gs.isCatching = true;
-    document.getElementById('catch-btn').classList.add('show');
-    // 注意：掉落事件時，依然會正常產生手上的衣服，考驗多工
+    gs.isBoiling = true;
+    document.getElementById('parallel-task').classList.add('show');
   }
 
-  generateItemLogic();
+  generateAndRender();
 }
 
-function generateItemLogic() {
-  let isSock = (gs.level >= 4 && Math.random() > 0.7);
-  let type, emoji, correctBin;
-
-  if (isSock) {
-    type = 'sock'; emoji = '🧦'; correctBin = 'mid';
-  } else if (gs.level === 1) {
-    let isDark = Math.random() > 0.5;
-    type = isDark ? 'dark' : 'light';
-    emoji = ITEMS[type][Math.floor(Math.random() * ITEMS[type].length)];
-    correctBin = isDark ? 'left' : 'right';
-  } else {
-    let isTop = Math.random() > 0.5;
-    type = isTop ? 'top' : 'bottom';
-    emoji = ITEMS[type][Math.floor(Math.random() * ITEMS[type].length)];
-    
-    // L3 規則反轉邏輯
-    if (gs.level === 3 && gs.currentCount >= 5) correctBin = isTop ? 'right' : 'left';
-    else correctBin = isTop ? 'left' : 'right';
-  }
-
-  gs.currentItem = { type, correctBin };
-  elEmoji.innerText = emoji;
+function generateAndRender() {
+  const data = LEVEL_CONFIGS[gs.level].generate(gs);
+  gs.currentItem = data;
+  document.getElementById('item-emoji').innerText = data.emoji;
+  if (data.cssClass) elItem.classList.add(data.cssClass);
+  
   gs.itemSpawnTime = Date.now();
   gs.isLocked = false;
 }
 
 /**
- * L5 掉落物接取處理
+ * L5 顧火事件接取
  */
-function handleCatch() {
-  if (!gs.isCatching) return;
-  gs.isCatching = false;
-  document.getElementById('catch-btn').classList.remove('show');
-  // 接住後，解除鎖定，允許繼續分類手上的衣服
-  document.getElementById('catch-btn').style.transform = "scale(0.9)";
-  setTimeout(() => document.getElementById('catch-btn').style.transform = "", 150);
+function handleParallelTask() {
+  if (!gs.isBoiling) return;
+  gs.isBoiling = false;
+  document.getElementById('parallel-task').classList.remove('show');
+  
+  // 視覺回饋：按鈕縮小一下
+  const btn = document.getElementById('parallel-task');
+  btn.style.transform = "scale(0.8)";
+  setTimeout(() => btn.style.transform = "", 150);
 }
 
 /**
@@ -374,8 +381,8 @@ function handleCatch() {
 function handleBinTap(binId) {
   if (gs.isLocked) return;
   
-  // L5 盲動偵測：如果掉落物還沒接，卻先點了籃子 -> 判定為無效盲動
-  if (gs.isCatching) {
+  // L5 盲動偵測：湯在滾卻先去點盤子 -> 判定為無效盲動 (Redundant Clicks)
+  if (gs.isBoiling) {
     gs.metrics.redundant++;
     triggerErrorAnim();
     return;
@@ -398,14 +405,14 @@ function handleBinTap(binId) {
     }
     
     elItem.classList.add('success-pop');
-    setTimeout(spawnNextItem, 250); 
+    setTimeout(spawnNextItem, 300); 
     
   } else {
     // 錯誤邏輯 (無錯誤學習：只震動不扣分)
-    if (binId === 'mid' || gs.currentItem.correctBin === 'mid') {
-      gs.metrics.commission++; // 誤點垃圾桶，或該丟垃圾桶卻丟正常籃
+    if (gs.level === 4 && (binId === 'bad' || gs.currentItem.correctBin === 'bad')) {
+      gs.metrics.commission++; // L4：沒踩煞車把蟲丟進盆子，或把好菜丟垃圾桶
     } else {
-      gs.metrics.redundant++; // 左右放反算冗餘操作
+      gs.metrics.commission++; // 其他關卡的單純分類錯誤，統一記為 commission error 方便醫學追蹤
     }
     triggerErrorAnim();
   }
@@ -418,7 +425,7 @@ function triggerErrorAnim() {
 }
 
 /**
- * 結算並顯示數據
+ * 結算並顯示隱性 API 數據
  */
 function endGame() {
   let avgLatency = 0;
