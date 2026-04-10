@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>家事達人的一天 (明亮溫馨版)</title>
+<title>家事達人的一天 (動態版型優化)</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
   
@@ -11,23 +11,18 @@
   
   body { 
     font-family: 'Noto Sans TC', sans-serif; 
-    /* 溫馨明亮背景 */
     background-color: #f8fafc; 
     display: flex; justify-content: center; align-items: center; 
     min-height: 100vh; overflow: hidden; color: #334155;
   }
 
-  /* RWD 手機版型容器 - 亮色玻璃質感 */
   #app-container {
-    position: relative; 
-    width: 100%; max-width: 430px; 
-    height: 100vh; max-height: 900px;
+    position: relative; width: 100%; max-width: 430px; height: 100vh; max-height: 900px;
     display: flex; flex-direction: column; 
     background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
     box-shadow: 0 20px 60px rgba(0,0,0,0.1); overflow: hidden;
   }
 
-  /* 共用 UI 元件 */
   .screen {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     display: none; flex-direction: column; background: transparent; z-index: 10;
@@ -37,26 +32,24 @@
   .btn {
     background: #10b981; color: #fff; font-size: 18px; font-weight: 700;
     padding: 16px 24px; border: none; border-radius: 20px; cursor: pointer;
-    box-shadow: 0 6px 0 #059669, 0 15px 20px rgba(16,185,129,0.2); 
-    transition: all 0.1s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 6px 0 #059669; transition: all 0.1s; width: 100%;
   }
   .btn:active { transform: translateY(6px); box-shadow: 0 0 0 #059669; }
 
-  /* 首頁 (Level 選單) */
+  /* 首頁 */
   #home-screen { padding: 40px 24px; overflow-y: auto; }
-  .home-title { font-size: 32px; color: #059669; font-weight: 900; margin-bottom: 8px; line-height: 1.2; }
+  .home-title { font-size: 32px; color: #059669; font-weight: 900; margin-bottom: 8px; }
   .home-desc { font-size: 15px; color: #64748b; margin-bottom: 32px; }
   
   .level-card {
     background: rgba(255,255,255,0.7); border: 2px solid #fff;
     border-radius: 24px; padding: 20px; margin-bottom: 16px;
     display: flex; flex-direction: column; gap: 8px; cursor: pointer;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.04); transition: transform 0.1s;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.04);
   }
-  .level-card:active { transform: scale(0.97); background: #fff; }
+  .level-card:active { transform: scale(0.97); }
   .lv-badge { background: #d1fae5; color: #059669; font-size: 12px; font-weight: 900; padding: 6px 10px; border-radius: 10px; width: fit-content; }
   .lv-title { font-size: 18px; font-weight: 700; color: #1e293b; }
-  .lv-desc { font-size: 14px; color: #64748b; line-height: 1.4; }
 
   /* 遊戲畫面 */
   #header {
@@ -65,29 +58,29 @@
   }
   #progress-bar { width: 100%; height: 8px; background: #e2e8f0; border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
   #progress-fill { height: 100%; background: #10b981; width: 0%; transition: width 0.3s ease; }
-  #instruction { font-size: 20px; font-weight: 900; line-height: 1.4; min-height: 56px; display: flex; align-items: center; justify-content: center; color: #334155; }
+  #instruction { font-size: 20px; font-weight: 900; line-height: 1.4; min-height: 56px; display: flex; align-items: center; justify-content: center; }
 
   #game-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
   
-  /* 任務物件展示區 - 拔除死板邊框，加上柔和陰影 */
+  /* 任務物件展示區 */
   #item-display {
-    width: 160px; height: 160px; border-radius: 40px;
+    width: 150px; height: 150px; border-radius: 36px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    font-size: 90px; background: #ffffff; 
-    box-shadow: 0 25px 50px rgba(0,0,0,0.08), 0 0 0 4px rgba(255,255,255,0.5);
-    transition: transform 0.2s, opacity 0.2s; position: relative;
+    font-size: 80px; background: #ffffff; 
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08); border: 4px solid #fff;
+    transition: transform 0.2s, opacity 0.2s, background-color 0.2s; position: relative;
   }
 
   @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-12px) rotate(-8deg); } 75% { transform: translateX(12px) rotate(8deg); } }
-  .shake-error { animation: shake 0.3s ease-in-out; border: 4px solid #f43f5e !important; }
+  .shake-error { animation: shake 0.3s ease-in-out; border-color: #f43f5e !important; }
   .success-pop { transform: scale(0.5) translateY(100px) !important; opacity: 0; }
 
   /* 廣播與並行任務 UI */
   .overlay-alert {
-    position: absolute; top: 15%; left: 10%; width: 80%;
+    position: absolute; top: 10%; left: 10%; width: 80%;
     background: rgba(244, 63, 94, 0.95); padding: 20px; border-radius: 24px; color: white;
     text-align: center; font-weight: 900; font-size: 20px; box-shadow: 0 20px 40px rgba(244,63,94,0.3);
-    transform: scale(0); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 100;
+    transform: scale(0); transition: transform 0.3s; z-index: 100;
   }
   .overlay-alert.show { transform: scale(1); }
 
@@ -100,13 +93,23 @@
   #parallel-task.show { transform: scale(1); animation: shakeBoil 0.5s infinite ease-in-out; }
   @keyframes shakeBoil { 0%, 100% { transform: scale(1) rotate(0deg); } 25% { transform: scale(1.05) rotate(-5deg); } 75% { transform: scale(1.05) rotate(5deg); } }
 
-  /* 底部籃子區 */
+  /* 底部籃子區 - 支援多種動態排版 */
   #bins-container {
     padding: 20px 20px 40px; background: rgba(255,255,255,0.6); backdrop-filter: blur(15px);
     display: grid; gap: 12px; border-top: 1px solid rgba(255,255,255,0.8);
   }
-  .grid-2 { grid-template-columns: 1fr 1fr; }
-  .grid-4 { grid-template-columns: 1fr 1fr; } 
+  
+  /* 排版 A：標準水平 (L1, L2, L5) */
+  .layout-horizontal { grid-template-columns: 1fr 1fr; }
+  
+  /* 排版 B：垂直堆疊 (L3 冰箱) */
+  .layout-vertical { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+  .layout-vertical .bin { flex-direction: row; gap: 20px; padding: 12px 30px; justify-content: flex-start;}
+  
+  /* 排版 C：不對稱 (L4 挑菜) */
+  .layout-asym { grid-template-columns: 2fr 1fr; }
+  .layout-asym #bin-good { background: #ecfdf5; border-color: #10b981; } /* 超大洗菜盆 */
+  .layout-asym #bin-bad { background: #fff1f2; opacity: 0.9; } /* 小角落垃圾桶 */
 
   .bin {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -114,14 +117,14 @@
     border: 2px solid #f1f5f9; cursor: pointer; transition: all 0.1s; 
     box-shadow: 0 10px 20px rgba(0,0,0,0.03);
   }
-  .bin:active { transform: scale(0.92); border-color: #10b981; box-shadow: 0 5px 10px rgba(16,185,129,0.1); }
-  .bin-icon { font-size: 42px; margin-bottom: 8px; filter: drop-shadow(0 6px 6px rgba(0,0,0,0.08)); }
-  .bin-label { font-size: 15px; font-weight: 900; color: #475569; text-align: center; }
+  .bin:active { transform: scale(0.95); border-color: #10b981; }
+  .bin-icon { font-size: 42px; margin-bottom: 4px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+  .bin-label { font-size: 16px; font-weight: 900; color: #475569; text-align: center; }
 
   /* 結算畫面 */
   #result-screen { padding: 40px 24px; justify-content: center; }
-  .result-box { background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); border-radius: 40px; padding: 40px 24px; text-align: center; margin-bottom: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); }
-  .res-emoji { font-size: 80px; margin-bottom: 16px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1)); }
+  .result-box { background: rgba(255,255,255,0.9); border-radius: 40px; padding: 40px 24px; text-align: center; margin-bottom: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); }
+  .res-emoji { font-size: 80px; margin-bottom: 16px; }
   .res-title { font-size: 28px; font-weight: 900; color: #059669; margin-bottom: 8px; }
   
   .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; text-align: left; margin-bottom: 32px; margin-top: 24px;}
@@ -137,27 +140,22 @@
 
   <div id="home-screen" class="screen active">
     <div class="home-title">家事達人的一天</div>
-    <div class="home-desc">請選擇情境。每局固定 10 件家事，無時間壓力。</div>
+    <div class="home-desc">請選擇情境。每局固定 10 件家事。</div>
     
     <div class="level-card" onclick="startGame(1)">
-      <div class="lv-badge">L1 晨間洗衣</div>
-      <div class="lv-title">深淺分類 (基礎反應)</div>
+      <div class="lv-badge">L1 晨間洗衣</div><div class="lv-title">深淺分類 (基礎反應)</div>
     </div>
     <div class="level-card" onclick="startGame(2)">
-      <div class="lv-badge">L2 午後收衣</div>
-      <div class="lv-title">衣物歸位 (工作記憶)</div>
+      <div class="lv-badge">L2 午後收衣</div><div class="lv-title">衣物歸位 (工作記憶)</div>
     </div>
     <div class="level-card" onclick="startGame(3)">
-      <div class="lv-badge">L3 冰箱收納</div>
-      <div class="lv-title">生鮮分類 (認知彈性)</div>
+      <div class="lv-badge">L3 冰箱收納</div><div class="lv-title">生鮮分類 (認知彈性)</div>
     </div>
     <div class="level-card" onclick="startGame(4)">
-      <div class="lv-badge">L4 挑菜洗菜</div>
-      <div class="lv-title">挑除菜蟲 (抑制控制)</div>
+      <div class="lv-badge">L4 挑菜洗菜</div><div class="lv-title">挑除菜蟲 (抑制控制)</div>
     </div>
     <div class="level-card" onclick="startGame(5)">
-      <div class="lv-badge">L5 顧火擺盤</div>
-      <div class="lv-title">沸騰關火 (分配注意力)</div>
+      <div class="lv-badge">L5 顧火擺盤</div><div class="lv-title">沸騰關火 (分配注意力)</div>
     </div>
   </div>
 
@@ -185,15 +183,13 @@
     <div class="result-box">
       <div class="res-emoji">🎉</div>
       <div class="res-title">家事達人！</div>
-      
       <div class="metric-grid">
         <div class="metric-item"><div class="m-label">處理反應時間</div><div class="m-val"><span id="res-planning">0</span> <span style="font-size:12px">ms</span></div></div>
-        <div class="metric-item"><div class="m-label">衝動誤點 (煞車失敗)</div><div class="m-val"><span id="res-commission">0</span> <span style="font-size:12px">次</span></div></div>
+        <div class="metric-item"><div class="m-label">衝動誤點</div><div class="m-val"><span id="res-commission">0</span> <span style="font-size:12px">次</span></div></div>
         <div class="metric-item"><div class="m-label">切換停頓時間</div><div class="m-val"><span id="res-reconfig">N/A</span> <span style="font-size:12px">ms</span></div></div>
         <div class="metric-item"><div class="m-label">無效盲動次數</div><div class="m-val"><span id="res-redundant">0</span> <span style="font-size:12px">次</span></div></div>
       </div>
-      
-      <button class="btn" onclick="showScreen('home-screen')">返回情境選單</button>
+      <button class="btn" onclick="showScreen('home-screen')">返回選單</button>
     </div>
   </div>
 
@@ -202,17 +198,19 @@
 <script>
 const TOTAL_ITEMS = 10;
 
-// 五階情境設定檔 (修復雙重反轉Bug、更換Icon、拔除背景色塊)
 const LEVEL_CONFIGS = {
   1: {
     inst: "請將衣服依<span class='hl-blue'>深淺色</span>丟入洗衣機",
-    bins: [ { id: 'dark', icon: '🎛️', label: '深色衣物' }, { id: 'light', icon: '🎛️', label: '淺色衣物' } ],
-    gridClass: 'grid-2',
+    bins: [ { id: 'dark', icon: '🎛️', label: '深色機' }, { id: 'light', icon: '🎛️', label: '淺色機' } ],
+    layoutClass: 'layout-horizontal',
     generate: () => {
       const isDark = Math.random() > 0.5;
-      // 明確的深色物品 vs 淺色物品，不依賴底色
-      const emoji = isDark ? ['🧥','👖','👞'][Math.floor(Math.random()*3)] : ['👕','🧦','🥼'][Math.floor(Math.random()*3)];
-      return { emoji, correctBin: isDark ? 'dark' : 'light' };
+      // 徹底拔除 OS Emoji 色差，統一用T恤，但賦予絕對的深色/淺色 CSS 背景
+      return { 
+        emoji: '👕', 
+        correctBin: isDark ? 'dark' : 'light',
+        itemStyle: isDark ? 'background-color: #1e293b; color: #fff;' : 'background-color: #fdfccb; color: #000;'
+      };
     }
   },
   2: {
@@ -221,45 +219,43 @@ const LEVEL_CONFIGS = {
       { id: 'top', icon: '🧺', label: '上衣' }, { id: 'bottom', icon: '🧺', label: '褲子' },
       { id: 'sock', icon: '🧺', label: '襪子' }, { id: 'underwear', icon: '🧺', label: '內衣褲' }
     ],
-    gridClass: 'grid-4',
+    layoutClass: 'layout-horizontal', // 會自動斷行變 2x2
     generate: () => {
       const types = [
         { type: 'top', emojis: ['👕','🧥','👔'] }, { type: 'bottom', emojis: ['👖','🩳'] },
         { type: 'sock', emojis: ['🧦'] }, { type: 'underwear', emojis: ['🩲'] }
       ];
       const selected = types[Math.floor(Math.random() * types.length)];
-      return { emoji: selected.emojis[Math.floor(Math.random() * selected.emojis.length)], correctBin: selected.type };
+      return { emoji: selected.emojis[Math.floor(Math.random() * selected.emojis.length)], correctBin: selected.type, itemStyle: '' };
     }
   },
   3: {
     inst: "蔬菜放<span class='hl-blue'>上層</span>，肉類放<span class='hl-orange'>下層</span>",
     bins: [ { id: 'veg', icon: '🧊', label: '上層 (蔬菜)' }, { id: 'meat', icon: '🧊', label: '下層 (肉類)' } ],
-    gridClass: 'grid-2',
+    layoutClass: 'layout-vertical', // 垂直堆疊，模擬真冰箱
     generate: (state) => {
       const isVeg = Math.random() > 0.5;
       const emoji = isVeg ? ['🥦','🥬','🥕'][Math.floor(Math.random()*3)] : ['🥩','🍗','🥓'][Math.floor(Math.random()*3)];
-      // 【Bug修復】：正解永遠對應對象的 ID，蔬菜永遠丟 'veg'，肉永遠丟 'meat'。我們只在 UI 上改變籃子的文字標籤。
-      return { emoji, correctBin: isVeg ? 'veg' : 'meat' };
+      return { emoji, correctBin: isVeg ? 'veg' : 'meat', itemStyle: '' };
     }
   },
   4: {
-    inst: "健康蔬菜放<span class='hl-blue'>洗菜盆</span>，菜蟲請丟<span class='hl-red'>垃圾桶</span>！",
-    bins: [ { id: 'good', icon: '🥣', label: '洗菜盆' }, { id: 'bad', icon: '🗑️', label: '垃圾桶' } ],
-    gridClass: 'grid-2',
+    inst: "健康蔬菜放<span class='hl-blue'>大盆子</span>，菜蟲請挑去<span class='hl-red'>垃圾桶</span>！",
+    bins: [ { id: 'good', icon: '🥣', label: '大洗菜盆' }, { id: 'bad', icon: '🗑️', label: '垃圾桶' } ],
+    layoutClass: 'layout-asym', // 不對稱排版：大盆子 + 小垃圾桶
     generate: () => {
       const isBad = Math.random() > 0.7; 
-      // 【優化】：移除枯葉，改為明確的菜蟲與蜘蛛
       const emoji = isBad ? ['🐛','🕷️'][Math.floor(Math.random()*2)] : ['🥬','🥦'][Math.floor(Math.random()*2)];
-      return { emoji, correctBin: isBad ? 'bad' : 'good' };
+      return { emoji, correctBin: isBad ? 'bad' : 'good', itemStyle: '' };
     }
   },
   5: {
-    inst: "餐具分類擺盤，並隨時注意<span class='hl-red'>湯鍋沸騰</span>！",
-    bins: [ { id: 'bowl', icon: '🟩', label: '左側桌位' }, { id: 'plate', icon: '🟧', label: '右側桌位' } ],
-    gridClass: 'grid-2',
+    inst: "餐具分類擺盤，注意<span class='hl-red'>湯鍋沸騰</span>！",
+    bins: [ { id: 'bowl', icon: '🟩', label: '左側餐墊' }, { id: 'plate', icon: '🟧', label: '右側餐墊' } ],
+    layoutClass: 'layout-horizontal',
     generate: () => {
       const isBowl = Math.random() > 0.5;
-      return { emoji: isBowl ? '🥣' : '🍽️', correctBin: isBowl ? 'bowl' : 'plate' };
+      return { emoji: isBowl ? '🥣' : '🍽️', correctBin: isBowl ? 'bowl' : 'plate', itemStyle: '' };
     }
   }
 };
@@ -299,7 +295,8 @@ function startGame(level) {
 
 function renderBins() {
   const config = LEVEL_CONFIGS[gs.level];
-  elBins.className = config.gridClass;
+  // 注入專屬版型 Class
+  elBins.className = config.layoutClass;
   elBins.innerHTML = config.bins.map(b => `
     <div class="bin" id="bin-${b.id}" onclick="handleBinTap('${b.id}')">
       <div class="bin-icon">${b.icon}</div>
@@ -313,7 +310,6 @@ function spawnNextItem() {
 
   elItem.className = '';
   
-  // L3 規則切換觸發 
   if (gs.level === 3 && gs.currentCount === 5 && !gs.waitingForReconfig) {
     gs.waitingForReconfig = true;
     document.getElementById('rule-alert-msg').innerText = "蔬菜改放下層，肉類改放上層！";
@@ -321,7 +317,8 @@ function spawnNextItem() {
     
     setTimeout(() => { 
       document.getElementById('rule-alert').classList.remove('show');
-      // 【Bug修復】：只改變 UI 文字，底層 ID 綁定維持不變
+      // 動態對調按鈕位置 (透過 flex-direction 或 DOM 排序)
+      elBins.appendChild(document.getElementById('bin-veg')); 
       document.getElementById('label-veg').innerText = "下層 (蔬菜)";
       document.getElementById('label-meat').innerText = "上層 (肉類)";
       elInst.innerHTML = "蔬菜放<span class='hl-orange'>下層</span>，肉類放<span class='hl-blue'>上層</span>";
@@ -331,7 +328,6 @@ function spawnNextItem() {
     return;
   }
 
-  // L5 突發顧火事件
   if (gs.level === 5 && Math.random() > 0.7 && gs.currentCount > 0) {
     gs.isBoiling = true;
     document.getElementById('parallel-task').classList.add('show');
@@ -344,6 +340,10 @@ function generateAndRender() {
   const data = LEVEL_CONFIGS[gs.level].generate(gs);
   gs.currentItem = data;
   document.getElementById('item-emoji').innerText = data.emoji;
+  
+  // L1 專用：絕對顏色覆寫
+  elItem.style.cssText = data.itemStyle;
+  
   gs.itemSpawnTime = Date.now();
   gs.isLocked = false;
 }
@@ -385,11 +385,7 @@ function handleBinTap(binId) {
     setTimeout(spawnNextItem, 300); 
     
   } else {
-    if (gs.level === 4 && (binId === 'bad' || gs.currentItem.correctBin === 'bad')) {
-      gs.metrics.commission++; 
-    } else {
-      gs.metrics.commission++; 
-    }
+    gs.metrics.commission++; 
     triggerErrorAnim();
   }
 }
