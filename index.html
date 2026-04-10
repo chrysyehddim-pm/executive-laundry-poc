@@ -2,356 +2,436 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>智慧洗衣分類 (執行力測試 MVP)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>家事達人：智慧洗衣 (執行力評估)</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
   
-  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+  
   body { 
     font-family: 'Noto Sans TC', sans-serif; 
-    background-color: #1a2e1a; 
+    background-color: #0f172a; /* 桌面端深色背景 */
     display: flex; justify-content: center; align-items: center; 
-    height: 100vh; overflow: hidden; color: #e8f5e8;
+    min-height: 100vh; overflow: hidden; color: #e8f5e8;
   }
 
+  /* RWD 手機版型容器 */
   #app-container {
-    position: relative; width: 100%; max-width: 480px; height: 100vh; max-height: 850px;
-    display: flex; flex-direction: column; background: #233a23;
-    box-shadow: 0 0 30px rgba(0,0,0,0.5); overflow: hidden;
+    position: relative; 
+    width: 100%; max-width: 430px; /* 貼近 iPhone Pro Max 寬度 */
+    height: 100vh; max-height: 900px;
+    display: flex; flex-direction: column; 
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    box-shadow: 0 0 40px rgba(0,0,0,0.8); overflow: hidden;
   }
 
-  /* 首頁登錄畫面 */
-  #start-screen {
+  /* ===== 共用 UI 元件 ===== */
+  .screen {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: #1a2e1a; display: flex; flex-direction: column; 
-    align-items: center; justify-content: center; z-index: 1000; padding: 30px;
-    text-align: center;
+    display: none; flex-direction: column; background: transparent; z-index: 10;
   }
-  .start-title { font-size: 32px; color: #3DBE7A; font-weight: 900; margin-bottom: 15px; }
-  .start-desc { font-size: 16px; color: #a5d6a7; margin-bottom: 30px; line-height: 1.6; }
-  .input-field {
-    width: 80%; padding: 15px; margin-bottom: 15px; border-radius: 12px;
-    border: 2px solid #3DBE7A; background: rgba(255,255,255,0.1); color: #fff;
-    font-size: 16px; font-family: 'Noto Sans TC', sans-serif; text-align: center;
-  }
-  .input-field::placeholder { color: #888; }
-  .start-btn {
-    background: #3DBE7A; color: #fff; font-size: 18px; font-weight: 700;
-    padding: 15px 40px; border: none; border-radius: 50px; cursor: pointer;
-    margin-top: 15px; width: 80%; box-shadow: 0 4px 15px rgba(61,190,122,0.4);
-    transition: transform 0.1s;
-  }
-  .start-btn:active { transform: scale(0.95); }
+  .screen.active { display: flex; }
 
-  /* 頂部正向資訊列 */
+  .btn {
+    background: #10b981; color: #fff; font-size: 18px; font-weight: 700;
+    padding: 16px 24px; border: none; border-radius: 16px; cursor: pointer;
+    box-shadow: 0 8px 0 #059669; transition: all 0.1s; touch-action: manipulation;
+    width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn:active { transform: translateY(8px); box-shadow: 0 0 0 #059669; }
+
+  /* ===== 首頁 (Level 選單) ===== */
+  #home-screen { padding: 40px 24px; overflow-y: auto; }
+  .home-title { font-size: 32px; color: #10b981; font-weight: 900; margin-bottom: 8px; line-height: 1.2; }
+  .home-desc { font-size: 15px; color: #94a3b8; margin-bottom: 32px; }
+  
+  .level-card {
+    background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 20px; padding: 20px; margin-bottom: 16px;
+    display: flex; flex-direction: column; gap: 8px; cursor: pointer;
+  }
+  .level-card:active { background: rgba(255,255,255,0.1); }
+  .lv-badge { background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 12px; font-weight: 900; padding: 4px 8px; border-radius: 8px; width: fit-content; }
+  .lv-title { font-size: 18px; font-weight: 700; color: #f8fafc; }
+  .lv-desc { font-size: 14px; color: #94a3b8; line-height: 1.4; }
+
+  /* ===== 遊戲畫面 ===== */
   #header {
-    padding: 20px 15px; background: rgba(10, 20, 10, 0.6);
-    border-bottom: 3px solid #3DBE7A; text-align: center;
+    padding: 24px 20px 16px; background: rgba(15, 23, 42, 0.9);
+    border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; z-index: 20;
   }
-  #score-display { font-size: 16px; color: #3DBE7A; font-weight: 700; margin-bottom: 8px; }
-  #instruction { font-size: 22px; font-weight: 900; line-height: 1.4; transition: color 0.3s; }
-  .highlight { color: #FFB800; }
+  #progress-bar { width: 100%; height: 6px; background: #334155; border-radius: 4px; margin-bottom: 16px; overflow: hidden; }
+  #progress-fill { height: 100%; background: #10b981; width: 0%; transition: width 0.3s ease; }
+  
+  #instruction { font-size: 20px; font-weight: 900; line-height: 1.4; min-height: 56px; display: flex; align-items: center; justify-content: center; }
+  .hl-left { color: #38bdf8; }
+  .hl-right { color: #fbbf24; }
+  .hl-alert { color: #f43f5e; }
 
-  /* 遊戲主要互動區 */
-  #game-area {
-    flex: 1; display: flex; flex-direction: column; 
-    align-items: center; justify-content: center; position: relative;
-  }
-
+  #game-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+  
+  /* 衣服展示區 */
   #item-display {
-    width: 130px; height: 130px; border-radius: 24px;
+    width: 140px; height: 140px; border-radius: 32px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    font-size: 70px; background: #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-    border: 4px solid #ddd;
-    transition: transform 0.2s, opacity 0.2s;
+    font-size: 80px; background: #fff; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    border: 4px solid #e2e8f0; transition: transform 0.2s, opacity 0.2s;
   }
+  
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-12px) rotate(-8deg); } 75% { transform: translateX(12px) rotate(8deg); } }
+  .shake-error { animation: shake 0.3s ease-in-out; border-color: #f43f5e !important; }
+  .success-pop { transform: scale(0.5) translateY(100px) !important; opacity: 0; }
 
-  /* 錯誤震動動畫 */
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-10px) rotate(-5deg); }
-    75% { transform: translateX(10px) rotate(5deg); }
-  }
-  .shake-error { animation: shake 0.3s ease-in-out; }
-  .success-pop { transform: scale(0) !important; opacity: 0; }
-
-  /* 底部籃子區 */
+  /* 底部籃子區 (符合大拇指熱區) */
   #bins-container {
-    display: flex; justify-content: space-around; width: 100%; padding: 20px 10px 40px;
-    background: rgba(0,0,0,0.2);
+    display: flex; justify-content: space-between; gap: 12px;
+    padding: 20px 20px 40px; background: rgba(0,0,0,0.3); backdrop-filter: blur(10px);
   }
   .bin {
-    display: flex; flex-direction: column; align-items: center;
-    padding: 15px; border-radius: 16px; background: rgba(255,255,255,0.05);
-    border: 2px solid rgba(61,190,122,0.3); cursor: pointer; transition: all 0.1s;
-    width: 30%;
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 20px 10px; border-radius: 24px; background: rgba(255,255,255,0.05);
+    border: 2px solid rgba(255,255,255,0.1); cursor: pointer; transition: all 0.1s; touch-action: manipulation;
   }
-  .bin:active { transform: scale(0.95); background: rgba(61,190,122,0.2); }
-  .bin-icon { font-size: 45px; margin-bottom: 5px; }
-  .bin-label { font-size: 16px; font-weight: 700; color: #a5d6a7; text-align: center; }
+  .bin:active { transform: scale(0.92); background: rgba(255,255,255,0.15); border-color: #10b981; }
+  .bin-icon { font-size: 40px; margin-bottom: 8px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); }
+  .bin-label { font-size: 15px; font-weight: 700; color: #cbd5e1; text-align: center; }
 
-  /* 隱藏 API Metrics */
-  #debug-panel { display: none; }
-
-  /* 結算畫面 */
-  #result-screen {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: #1a2e1a; display: none; flex-direction: column; 
-    align-items: center; justify-content: center; z-index: 999; text-align: center;
+  /* 廣播打斷與掉落事件 UI */
+  .overlay-alert {
+    position: absolute; top: 30%; left: 10%; width: 80%;
+    background: rgba(244, 63, 94, 0.95); padding: 24px; border-radius: 24px;
+    text-align: center; font-weight: 900; font-size: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    transform: scale(0); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 100;
   }
-  .result-title { font-size: 32px; color: #3DBE7A; font-weight: 900; margin-bottom: 10px; }
-  .result-name { font-size: 20px; color: #fff; margin-bottom: 20px; }
-  .result-data { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; margin-bottom: 30px; text-align: left; width: 80%;}
-  .result-data div { font-size: 16px; margin: 8px 0; color: #e8f5e8; }
+  .overlay-alert.show { transform: scale(1); }
+
+  #catch-btn {
+    position: absolute; bottom: 200px; right: 20px;
+    background: #f59e0b; padding: 16px 24px; border-radius: 50px;
+    font-size: 18px; font-weight: 900; box-shadow: 0 8px 0 #b45309;
+    transform: scale(0); transition: transform 0.2s; z-index: 50; display: flex; gap: 8px; align-items: center;
+  }
+  #catch-btn.show { transform: scale(1); animation: float 2s infinite ease-in-out; }
+  @keyframes float { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-10px) scale(1.05); } }
+
+  /* ===== 結算畫面 ===== */
+  #result-screen { padding: 40px 24px; justify-content: center; }
+  .result-box { background: rgba(255,255,255,0.05); border-radius: 32px; padding: 32px 24px; text-align: center; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.1); }
+  .res-emoji { font-size: 70px; margin-bottom: 16px; }
+  .res-title { font-size: 28px; font-weight: 900; color: #10b981; margin-bottom: 8px; }
+  .res-subtitle { font-size: 16px; color: #94a3b8; margin-bottom: 32px; }
+  
+  .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; text-align: left; margin-bottom: 32px; }
+  .metric-item { background: rgba(0,0,0,0.2); padding: 16px; border-radius: 16px; }
+  .m-label { font-size: 12px; color: #94a3b8; margin-bottom: 4px; }
+  .m-val { font-size: 20px; font-weight: 900; color: #f8fafc; font-family: monospace; }
+  
 </style>
 </head>
 <body>
 
 <div id="app-container">
 
-  <div id="start-screen">
-    <div class="start-title">家事達人：衣物分類</div>
-    <div class="start-desc">
-      👕 遊戲說明 👚<br><br>
-      畫面會隨機出現上衣或褲子。<br>
-      請仔細閱讀上方的「分類規則」，<br>
-      並將衣物投入正確的洗衣籃中。<br><br>
-      ⚠️ 提示：規則可能會隨時改變喔！
-    </div>
-    <input type="text" id="player-name" class="input-field" placeholder="請輸入姓名">
-    <input type="number" id="player-age" class="input-field" placeholder="請輸入年齡 (歲)">
-    <button class="start-btn" onclick="startGame()">開始挑戰</button>
-  </div>
-  
-  <div id="header">
-    <div id="score-display">🌟 已分類 0 件</div>
-    <div id="instruction">請將衣物依款式分類！</div>
-  </div>
-
-  <div id="game-area">
-    <div id="item-display">
-      <div id="item-emoji">👕</div>
-    </div>
-  </div>
-
-  <div id="bins-container">
-    <div class="bin" onclick="handleBinClick('left')">
-      <div class="bin-icon">🧺</div>
-      <div class="bin-label" id="label-left">上衣類</div>
-    </div>
-    <div class="bin" onclick="handleBinClick('trash')">
-      <div class="bin-icon">🗑️</div>
-      <div class="bin-label" style="color: #ef5350;">襪子丟棄</div>
-    </div>
-    <div class="bin" onclick="handleBinClick('right')">
-      <div class="bin-icon">🧺</div>
-      <div class="bin-label" id="label-right">褲子類</div>
-    </div>
-  </div>
-
-  <div id="debug-panel">
-    Phase: <span id="dbg-phase">1</span>
-    Timer: <span id="dbg-timer">0</span>
-    planning: <span id="dbg-latency">0</span>
-    reconfig: <span id="dbg-reconfig">0</span>
-    commission: <span id="dbg-commission">0</span>
-  </div>
-
-  <div id="result-screen">
-    <div class="result-title">🎉 挑戰完成！</div>
-    <div class="result-name" id="res-player"></div>
-    <div style="font-size: 18px; margin-bottom: 20px;">您今天成功整理了 <span id="res-total" style="color: #FFB800; font-weight: bold; font-size: 28px;">0</span> 件衣物！</div>
+  <div id="home-screen" class="screen active">
+    <div class="home-title">家事達人：<br>智慧洗衣</div>
+    <div class="home-desc">請選擇符合您評估需求的難度等級。每局固定 10 件衣物，無時間壓力。</div>
     
-    <div class="result-data">
-      <div style="color:#5a8a5a; font-size: 12px; margin-bottom: 10px;">[底層隱性醫療數據萃取]</div>
-      <div>處理反應時間： <span id="res-latency" class="highlight">0</span> ms</div>
-      <div>規則切換延遲： <span id="res-reconfig" class="highlight">0</span> ms</div>
-      <div>衝動錯誤次數： <span id="res-commission" class="highlight">0</span> 次</div>
+    <div class="level-card" onclick="startGame(1)">
+      <div class="lv-badge">L1 暖身</div>
+      <div class="lv-title">單一維度分類 (顏色)</div>
+      <div class="lv-desc">深淺分類，測量基礎處理反應時間。</div>
     </div>
-    
-    <button class="start-btn" onclick="location.reload()">重新開始</button>
+    <div class="level-card" onclick="startGame(2)">
+      <div class="lv-badge">L2 基礎</div>
+      <div class="lv-title">工作記憶負荷 (款式)</div>
+      <div class="lv-desc">依款式丟入三個收納籃，考驗暫存記憶。</div>
+    </div>
+    <div class="level-card" onclick="startGame(3)">
+      <div class="lv-badge">L3 標準</div>
+      <div class="lv-title">規則突變 (認知彈性)</div>
+      <div class="lv-desc">中途強制改變分類規則，測量大腦切換成本。</div>
+    </div>
+    <div class="level-card" onclick="startGame(4)">
+      <div class="lv-badge">L4 進階</div>
+      <div class="lv-title">衣物檢查 (抑制控制)</div>
+      <div class="lv-desc">加入廢棄物誘餌，測量煞車與衝動克制能力。</div>
+    </div>
+    <div class="level-card" onclick="startGame(5)">
+      <div class="lv-badge">L5 極限</div>
+      <div class="lv-title">家事並行 (分配性注意力)</div>
+      <div class="lv-desc">分類時須同時處理突發掉落物，測量多工效能。</div>
+    </div>
+  </div>
+
+  <div id="game-screen" class="screen">
+    <div id="header">
+      <div id="progress-bar"><div id="progress-fill"></div></div>
+      <div id="instruction">準備中...</div>
+    </div>
+
+    <div id="game-area">
+      <div id="item-display"><div id="item-emoji">👕</div></div>
+      
+      <div id="rule-alert" class="overlay-alert">⚠️ 廣播：規則改變！<br><span style="font-size:18px; font-weight:400; margin-top:8px; display:block;">請依照新指示操作</span></div>
+      
+      <div id="catch-btn" onclick="handleCatch()"><span style="font-size: 24px;">🧥</span> 掉落！快接住</div>
+    </div>
+
+    <div id="bins-container">
+      <div class="bin" id="bin-left" onclick="handleBinTap('left')">
+        <div class="bin-icon" id="icon-left">🧺</div>
+        <div class="bin-label" id="label-left">選項 A</div>
+      </div>
+      <div class="bin" id="bin-mid" onclick="handleBinTap('mid')">
+        <div class="bin-icon" id="icon-mid">🗑️</div>
+        <div class="bin-label" id="label-mid" style="color: #f43f5e;">垃圾桶</div>
+      </div>
+      <div class="bin" id="bin-right" onclick="handleBinTap('right')">
+        <div class="bin-icon" id="icon-right">🧺</div>
+        <div class="bin-label" id="label-right">選項 B</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="result-screen" class="screen">
+    <div class="result-box">
+      <div class="res-emoji">🎉</div>
+      <div class="res-title">家事達人！</div>
+      <div class="res-subtitle">您順利完成了 10 件衣物的整理作業。</div>
+      
+      <div class="metric-grid">
+        <div class="metric-item">
+          <div class="m-label">處理反應時間</div>
+          <div class="m-val"><span id="res-planning">0</span> <span style="font-size:12px;color:#94a3b8">ms</span></div>
+        </div>
+        <div class="metric-item">
+          <div class="m-label">衝動誤點次數</div>
+          <div class="m-val"><span id="res-commission">0</span> <span style="font-size:12px;color:#94a3b8">次</span></div>
+        </div>
+        <div class="metric-item">
+          <div class="m-label">切換停頓時間</div>
+          <div class="m-val"><span id="res-reconfig">N/A</span> <span style="font-size:12px;color:#94a3b8">ms</span></div>
+        </div>
+        <div class="metric-item">
+          <div class="m-label">無效盲動次數</div>
+          <div class="m-val"><span id="res-redundant">0</span> <span style="font-size:12px;color:#94a3b8">次</span></div>
+        </div>
+      </div>
+      
+      <button class="btn" onclick="showScreen('home-screen')">返回難度選單</button>
+    </div>
   </div>
 
 </div>
 
 <script>
+/**
+ * 核心引擎：API 與狀態管理
+ */
+const ITEMS = {
+  dark: ['🧥', '👖', '👔'], light: ['👕', '🩲'], top: ['👕', '🧥', '👔'], bottom: ['👖', '🩲'], sock: ['🧦']
+};
+const TOTAL_ITEMS = 10;
+
 let gs = {
-  playerName: '',
-  playerAge: '',
-  phase: 1,
-  timer: 0,
-  intervalId: null,
-  sortedCount: 0,
-  isLocked: false,
-  currentItem: null,
-  itemSpawnTime: 0,
-  waitingForReconfig: false,
+  level: 1, currentCount: 0, isLocked: false,
+  currentItem: { emoji: '', category: '', correctBin: '' },
+  itemSpawnTime: 0, 
+  waitingForReconfig: false, // L3 切換標記
+  isCatching: false,         // L5 掉落標記
   metrics: {
-    latencies: [],
-    reconfigLatency: null,
-    commission: 0
+    latencies: [], reconfigLatency: null, commission: 0, redundant: 0
   }
 };
-
-const CLOTHES = {
-  top: { type: 'top', emojis: ['👕', '👔', '🧥'] },
-  bottom: { type: 'bottom', emojis: ['👖', '🩳'] }
-};
-const SOCK_EMOJI = '🧦';
 
 const elItem = document.getElementById('item-display');
 const elEmoji = document.getElementById('item-emoji');
-const elInstruction = document.getElementById('instruction');
-const elScore = document.getElementById('score-display');
-const elLabelLeft = document.getElementById('label-left');
-const elLabelRight = document.getElementById('label-right');
+const elInst = document.getElementById('instruction');
 
-function startGame() {
-  const nameInput = document.getElementById('player-name').value.trim();
-  const ageInput = document.getElementById('player-age').value.trim();
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/**
+ * 啟動遊戲與難度佈局
+ */
+function startGame(level) {
+  gs = {
+    level: level, currentCount: 0, isLocked: false, currentItem: {}, itemSpawnTime: 0,
+    waitingForReconfig: false, isCatching: false,
+    metrics: { latencies: [], reconfigLatency: null, commission: 0, redundant: 0 }
+  };
   
-  if (!nameInput || !ageInput) {
-    alert("請填寫姓名與年齡，才能建立您的專屬評估報告！");
+  document.getElementById('progress-fill').style.width = '0%';
+  document.getElementById('rule-alert').classList.remove('show');
+  document.getElementById('catch-btn').classList.remove('show');
+  
+  applyLevelUI();
+  showScreen('game-screen');
+  setTimeout(spawnNextItem, 500); // 緩衝後出題
+}
+
+/**
+ * 依據難度設定 UI 與指示
+ */
+function applyLevelUI() {
+  const midBin = document.getElementById('bin-mid');
+  
+  if (gs.level === 1) {
+    elInst.innerHTML = "<span class='hl-left'>深色</span>放左，<span class='hl-right'>淺色</span>放右";
+    document.getElementById('label-left').innerText = "深色機"; document.getElementById('label-right').innerText = "淺色機";
+    midBin.style.display = 'none'; // L1 不需要垃圾桶
+  } else if (gs.level >= 2) {
+    midBin.style.display = 'flex';
+    document.getElementById('icon-left').innerText = "👕"; document.getElementById('icon-right').innerText = "👖";
+    document.getElementById('label-mid').innerText = "襪子丟棄";
+    
+    // L3 後半段反轉規則
+    if (gs.level === 3 && gs.currentCount >= 5) {
+      elInst.innerHTML = "<span class='hl-alert'>反轉：</span>上衣放<span class='hl-right'>右</span>，褲子放<span class='hl-left'>左</span>";
+      document.getElementById('label-left').innerText = "褲子籃"; document.getElementById('label-right').innerText = "上衣籃";
+    } else {
+      elInst.innerHTML = "依<span class='hl-left'>上衣</span>或<span class='hl-right'>褲子</span>放入對應籃子";
+      document.getElementById('label-left').innerText = "上衣籃"; document.getElementById('label-right').innerText = "褲子籃";
+    }
+  }
+}
+
+/**
+ * 產生下一件物品
+ */
+function spawnNextItem() {
+  if (gs.currentCount >= TOTAL_ITEMS) return endGame();
+
+  elItem.className = '';
+  
+  // L3 規則切換觸發 (剛好到達第 5 件時)
+  if (gs.level === 3 && gs.currentCount === 5 && !gs.waitingForReconfig) {
+    gs.waitingForReconfig = true;
+    document.getElementById('rule-alert').classList.add('show');
+    setTimeout(() => { 
+      document.getElementById('rule-alert').classList.remove('show');
+      applyLevelUI();
+      generateItemLogic(); // 廣播結束後才出題
+    }, 2000);
     return;
   }
-  
-  gs.playerName = nameInput;
-  gs.playerAge = ageInput;
-  
-  document.getElementById('start-screen').style.display = 'none';
-  initGame();
+
+  // L5 突發掉落事件 (隨機 30% 機率，且不在切換時發生)
+  if (gs.level === 5 && Math.random() > 0.7 && gs.currentCount > 0) {
+    gs.isCatching = true;
+    document.getElementById('catch-btn').classList.add('show');
+    // 注意：掉落事件時，依然會正常產生手上的衣服，考驗多工
+  }
+
+  generateItemLogic();
 }
 
-function initGame() {
-  applyPhaseRules();
-  spawnItem();
-  gs.intervalId = setInterval(gameTick, 1000);
-}
-
-function gameTick() {
-  gs.timer++;
-  document.getElementById('dbg-timer').innerText = gs.timer;
-
-  // 階段切換時，強制呼叫 spawnItem() 刷新題目，消除舊規則殘留的時間差
-  if (gs.timer === 20 && gs.phase === 1) {
-    gs.phase = 2;
-    gs.waitingForReconfig = true;
-    applyPhaseRules();
-    spawnItem(); 
-  } 
-  else if (gs.timer === 40 && gs.phase === 2) {
-    gs.phase = 3;
-    gs.waitingForReconfig = true; 
-    applyPhaseRules();
-    spawnItem(); 
-  }
-  else if (gs.timer >= 60) {
-    endGame();
-  }
-}
-
-function applyPhaseRules() {
-  document.getElementById('dbg-phase').innerText = gs.phase;
-  
-  if (gs.phase === 1) {
-    elInstruction.innerHTML = "上衣放<span class='highlight'>左</span>，褲子放<span class='highlight'>右</span>";
-    elLabelLeft.innerText = "上衣類";
-    elLabelRight.innerText = "褲子類";
-  } 
-  else if (gs.phase === 2) {
-    elInstruction.innerHTML = "⚠️ 規則反轉：上衣改放<span class='highlight'>右</span>！";
-    elInstruction.style.color = "#FFB800";
-    elLabelLeft.innerText = "褲子類";
-    elLabelRight.innerText = "上衣類";
-  }
-  else if (gs.phase === 3) {
-    elInstruction.innerHTML = "⚠️ 看到 <span style='color:#E53935'>襪子🧦</span> 請直接丟垃圾桶！";
-    elInstruction.style.color = "#fff";
-  }
-}
-
-function spawnItem() {
-  elItem.className = '';
-  const isSock = (gs.phase === 3 && Math.random() > 0.7);
-  let itemType, emoji;
+function generateItemLogic() {
+  let isSock = (gs.level >= 4 && Math.random() > 0.7);
+  let type, emoji, correctBin;
 
   if (isSock) {
-    itemType = 'sock';
-    emoji = SOCK_EMOJI;
+    type = 'sock'; emoji = '🧦'; correctBin = 'mid';
+  } else if (gs.level === 1) {
+    let isDark = Math.random() > 0.5;
+    type = isDark ? 'dark' : 'light';
+    emoji = ITEMS[type][Math.floor(Math.random() * ITEMS[type].length)];
+    correctBin = isDark ? 'left' : 'right';
   } else {
-    const isTop = Math.random() > 0.5;
-    const pool = isTop ? CLOTHES.top : CLOTHES.bottom;
-    itemType = pool.type;
-    emoji = pool.emojis[Math.floor(Math.random() * pool.emojis.length)];
+    let isTop = Math.random() > 0.5;
+    type = isTop ? 'top' : 'bottom';
+    emoji = ITEMS[type][Math.floor(Math.random() * ITEMS[type].length)];
+    
+    // L3 規則反轉邏輯
+    if (gs.level === 3 && gs.currentCount >= 5) correctBin = isTop ? 'right' : 'left';
+    else correctBin = isTop ? 'left' : 'right';
   }
 
-  gs.currentItem = {
-    type: itemType,
-    correctBin: determineCorrectBin(itemType)
-  };
-
+  gs.currentItem = { type, correctBin };
   elEmoji.innerText = emoji;
   gs.itemSpawnTime = Date.now();
   gs.isLocked = false;
 }
 
-function determineCorrectBin(itemType) {
-  if (itemType === 'sock') return 'trash';
-  if (gs.phase === 1) return itemType === 'top' ? 'left' : 'right';
-  return itemType === 'top' ? 'right' : 'left'; 
+/**
+ * L5 掉落物接取處理
+ */
+function handleCatch() {
+  if (!gs.isCatching) return;
+  gs.isCatching = false;
+  document.getElementById('catch-btn').classList.remove('show');
+  // 接住後，解除鎖定，允許繼續分類手上的衣服
+  document.getElementById('catch-btn').style.transform = "scale(0.9)";
+  setTimeout(() => document.getElementById('catch-btn').style.transform = "", 150);
 }
 
-function handleBinClick(binId) {
+/**
+ * 處理玩家點擊籃子
+ */
+function handleBinTap(binId) {
   if (gs.isLocked) return;
+  
+  // L5 盲動偵測：如果掉落物還沒接，卻先點了籃子 -> 判定為無效盲動
+  if (gs.isCatching) {
+    gs.metrics.redundant++;
+    triggerErrorAnim();
+    return;
+  }
+
   const now = Date.now();
   
   if (binId === gs.currentItem.correctBin) {
+    // 正確邏輯
     gs.isLocked = true;
-    gs.sortedCount++;
-    elScore.innerText = `🌟 已分類 ${gs.sortedCount} 件`;
+    gs.currentCount++;
+    document.getElementById('progress-fill').style.width = `${(gs.currentCount / TOTAL_ITEMS) * 100}%`;
     
     const latency = now - gs.itemSpawnTime;
-    
     if (gs.waitingForReconfig) {
       gs.metrics.reconfigLatency = latency;
-      document.getElementById('dbg-reconfig').innerText = latency;
       gs.waitingForReconfig = false;
     } else {
       gs.metrics.latencies.push(latency);
-      document.getElementById('dbg-latency').innerText = latency;
     }
     
     elItem.classList.add('success-pop');
-    setTimeout(spawnItem, 250); 
+    setTimeout(spawnNextItem, 250); 
     
   } else {
-    gs.metrics.commission++;
-    document.getElementById('dbg-commission').innerText = gs.metrics.commission;
-    
-    elItem.classList.remove('shake-error');
-    void elItem.offsetWidth;
-    elItem.classList.add('shake-error');
+    // 錯誤邏輯 (無錯誤學習：只震動不扣分)
+    if (binId === 'mid' || gs.currentItem.correctBin === 'mid') {
+      gs.metrics.commission++; // 誤點垃圾桶，或該丟垃圾桶卻丟正常籃
+    } else {
+      gs.metrics.redundant++; // 左右放反算冗餘操作
+    }
+    triggerErrorAnim();
   }
 }
 
+function triggerErrorAnim() {
+  elItem.classList.remove('shake-error');
+  void elItem.offsetWidth; // 觸發 reflow
+  elItem.classList.add('shake-error');
+}
+
+/**
+ * 結算並顯示數據
+ */
 function endGame() {
-  clearInterval(gs.intervalId);
-  gs.isLocked = true;
-  
   let avgLatency = 0;
   if (gs.metrics.latencies.length > 0) {
-    const sum = gs.metrics.latencies.reduce((a, b) => a + b, 0);
-    avgLatency = Math.round(sum / gs.metrics.latencies.length);
+    avgLatency = Math.round(gs.metrics.latencies.reduce((a, b) => a + b, 0) / gs.metrics.latencies.length);
   }
 
-  document.getElementById('res-player').innerText = `${gs.playerName} (${gs.playerAge}歲) 的表現：`;
-  document.getElementById('res-total').innerText = gs.sortedCount;
-  document.getElementById('res-latency').innerText = avgLatency;
-  document.getElementById('res-reconfig').innerText = gs.metrics.reconfigLatency || 'N/A';
+  document.getElementById('res-planning').innerText = avgLatency;
   document.getElementById('res-commission').innerText = gs.metrics.commission;
+  document.getElementById('res-reconfig').innerText = gs.metrics.reconfigLatency || 'N/A';
+  document.getElementById('res-redundant').innerText = gs.metrics.redundant;
   
-  document.getElementById('result-screen').style.display = 'flex';
+  showScreen('result-screen');
 }
 </script>
 </body>
