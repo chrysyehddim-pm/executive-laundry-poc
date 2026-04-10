@@ -3,193 +3,783 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>家事達人的一天 (動態版型優化)</title>
+<title>家事達人的一天</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
-  
-  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
-  
-  body { 
-    font-family: 'Noto Sans TC', sans-serif; 
-    background-color: #f8fafc; 
-    display: flex; justify-content: center; align-items: center; 
-    min-height: 100vh; overflow: hidden; color: #334155;
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
 
-  #app-container {
-    position: relative; width: 100%; max-width: 430px; height: 100vh; max-height: 900px;
-    display: flex; flex-direction: column; 
-    background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.1); overflow: hidden;
-  }
+:root {
+  --c-bg1: #0f0c29; --c-bg2: #302b63; --c-bg3: #24243e;
+  --c-green: #00d68f; --c-green-dark: #00b377;
+  --c-amber: #ffc107; --c-red: #ff4d6d; --c-blue: #4facfe;
+  --c-card: rgba(255,255,255,0.07);
+  --c-card-border: rgba(255,255,255,0.15);
+  --c-text: #f0f4ff;
+  --c-text-dim: rgba(240,244,255,0.55);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
 
-  .screen {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    display: none; flex-direction: column; background: transparent; z-index: 10;
-  }
-  .screen.active { display: flex; }
+body {
+  font-family: 'Nunito', 'Noto Sans TC', sans-serif;
+  background: #0f0c29;
+  display: flex; justify-content: center; align-items: center;
+  min-height: 100vh; overflow: hidden; color: var(--c-text);
+}
 
-  .btn {
-    background: #10b981; color: #fff; font-size: 18px; font-weight: 700;
-    padding: 16px 24px; border: none; border-radius: 20px; cursor: pointer;
-    box-shadow: 0 6px 0 #059669; transition: all 0.1s; width: 100%;
-  }
-  .btn:active { transform: translateY(6px); box-shadow: 0 0 0 #059669; }
+/* ─── ANIMATED BACKGROUND ─── */
+#app-container {
+  position: relative; width: 100%; max-width: 430px; height: 100vh; max-height: 900px;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  isolation: isolate;
+}
 
-  /* 首頁 */
-  #home-screen { padding: 40px 24px; overflow-y: auto; }
-  .home-title { font-size: 32px; color: #059669; font-weight: 900; margin-bottom: 8px; }
-  .home-desc { font-size: 15px; color: #64748b; margin-bottom: 32px; }
-  
-  .level-card {
-    background: rgba(255,255,255,0.7); border: 2px solid #fff;
-    border-radius: 24px; padding: 20px; margin-bottom: 16px;
-    display: flex; flex-direction: column; gap: 8px; cursor: pointer;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.04);
-  }
-  .level-card:active { transform: scale(0.97); }
-  .lv-badge { background: #d1fae5; color: #059669; font-size: 12px; font-weight: 900; padding: 6px 10px; border-radius: 10px; width: fit-content; }
-  .lv-title { font-size: 18px; font-weight: 700; color: #1e293b; }
+#bg-canvas {
+  position: absolute; inset: 0; z-index: 0;
+  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+}
 
-  /* 遊戲畫面 */
-  #header {
-    padding: 24px 20px 16px; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(0,0,0,0.05); text-align: center; z-index: 20;
-  }
-  #progress-bar { width: 100%; height: 8px; background: #e2e8f0; border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
-  #progress-fill { height: 100%; background: #10b981; width: 0%; transition: width 0.3s ease; }
-  #instruction { font-size: 20px; font-weight: 900; line-height: 1.4; min-height: 56px; display: flex; align-items: center; justify-content: center; }
+/* Animated floating orbs */
+#bg-canvas::before, #bg-canvas::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: floatOrb 8s ease-in-out infinite alternate;
+}
+#bg-canvas::before {
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(0,214,143,0.25) 0%, transparent 70%);
+  top: -100px; left: -80px;
+}
+#bg-canvas::after {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(79,172,254,0.2) 0%, transparent 70%);
+  bottom: -50px; right: -60px;
+  animation-delay: -4s;
+}
+@keyframes floatOrb {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(30px, 20px) scale(1.15); }
+}
 
-  #game-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-  
-  /* 任務物件展示區 */
-  #item-display {
-    width: 150px; height: 150px; border-radius: 36px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    font-size: 80px; background: #ffffff; 
-    box-shadow: 0 20px 40px rgba(0,0,0,0.08); border: 4px solid #fff;
-    transition: transform 0.2s, opacity 0.2s, background-color 0.2s; position: relative;
-  }
+/* ─── PER-LEVEL SCENE BACKGROUNDS ─── */
+/* Applied to #bg-canvas via JS class */
 
-  @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-12px) rotate(-8deg); } 75% { transform: translateX(12px) rotate(8deg); } }
-  .shake-error { animation: shake 0.3s ease-in-out; border-color: #f43f5e !important; }
-  .success-pop { transform: scale(0.5) translateY(100px) !important; opacity: 0; }
+/* L1 晨間洗衣 — 清晨窗光，暖橙漸層 */
+#bg-canvas.scene-1 {
+  background: linear-gradient(160deg, #1a0a00 0%, #3d1c02 30%, #6b3410 60%, #2d1a08 100%);
+}
+#bg-canvas.scene-1::before {
+  background: radial-gradient(ellipse at 20% 0%, rgba(255,160,50,0.4) 0%, transparent 60%);
+  width: 400px; height: 400px; top: -120px; left: -60px;
+}
+#bg-canvas.scene-1::after {
+  background: radial-gradient(ellipse, rgba(255,100,10,0.15) 0%, transparent 70%);
+  width: 280px; height: 280px; bottom: 0; right: -40px; animation-delay: -3s;
+}
 
-  /* 廣播與並行任務 UI */
-  .overlay-alert {
-    position: absolute; top: 10%; left: 10%; width: 80%;
-    background: rgba(244, 63, 94, 0.95); padding: 20px; border-radius: 24px; color: white;
-    text-align: center; font-weight: 900; font-size: 20px; box-shadow: 0 20px 40px rgba(244,63,94,0.3);
-    transform: scale(0); transition: transform 0.3s; z-index: 100;
-  }
-  .overlay-alert.show { transform: scale(1); }
+/* L2 午後收衣 — 午後暖陽，淡橙米白 */
+#bg-canvas.scene-2 {
+  background: linear-gradient(160deg, #1c1208 0%, #2e1e0a 35%, #3d2810 60%, #1a1206 100%);
+}
+#bg-canvas.scene-2::before {
+  background: radial-gradient(ellipse at 70% 10%, rgba(255,190,80,0.35) 0%, transparent 60%);
+  width: 380px; height: 380px; top: -80px; right: -60px; left: auto;
+}
+#bg-canvas.scene-2::after {
+  background: radial-gradient(ellipse, rgba(200,140,40,0.2) 0%, transparent 70%);
+  width: 260px; height: 260px; bottom: 60px; left: -40px; right: auto;
+}
 
-  #parallel-task {
-    position: absolute; top: 20px; right: 20px;
-    background: #f59e0b; padding: 12px 20px; border-radius: 20px; color: white;
-    font-size: 16px; font-weight: 900; box-shadow: 0 6px 0 #b45309;
-    transform: scale(0); transition: transform 0.2s; z-index: 50; display: flex; flex-direction: column; align-items: center; cursor: pointer;
-  }
-  #parallel-task.show { transform: scale(1); animation: shakeBoil 0.5s infinite ease-in-out; }
-  @keyframes shakeBoil { 0%, 100% { transform: scale(1) rotate(0deg); } 25% { transform: scale(1.05) rotate(-5deg); } 75% { transform: scale(1.05) rotate(5deg); } }
+/* L3 冰箱收納 — 冷藍冰感 */
+#bg-canvas.scene-3 {
+  background: linear-gradient(180deg, #030d1a 0%, #051626 40%, #081e30 70%, #040f1c 100%);
+}
+#bg-canvas.scene-3::before {
+  background: radial-gradient(ellipse, rgba(79,172,254,0.3) 0%, transparent 65%);
+  width: 360px; height: 360px; top: -80px; left: 50%; transform: translateX(-50%);
+}
+#bg-canvas.scene-3::after {
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0px,
+    transparent 58px,
+    rgba(79,172,254,0.06) 58px,
+    rgba(79,172,254,0.06) 60px
+  );
+  border-radius: 0; width: 100%; height: 100%; bottom: 0; right: 0;
+  animation: none; filter: none;
+}
 
-  /* 底部籃子區 - 支援多種動態排版 */
-  #bins-container {
-    padding: 20px 20px 40px; background: rgba(255,255,255,0.6); backdrop-filter: blur(15px);
-    display: grid; gap: 12px; border-top: 1px solid rgba(255,255,255,0.8);
-  }
-  
-  /* 排版 A：標準水平 (L1, L2, L5) */
-  .layout-horizontal { grid-template-columns: 1fr 1fr; }
-  
-  /* 排版 B：垂直堆疊 (L3 冰箱) */
-  .layout-vertical { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
-  .layout-vertical .bin { flex-direction: row; gap: 20px; padding: 12px 30px; justify-content: flex-start;}
-  
-  /* 排版 C：不對稱 (L4 挑菜) */
-  .layout-asym { grid-template-columns: 2fr 1fr; }
-  .layout-asym #bin-good { background: #ecfdf5; border-color: #10b981; } /* 超大洗菜盆 */
-  .layout-asym #bin-bad { background: #fff1f2; opacity: 0.9; } /* 小角落垃圾桶 */
+/* L4 挑菜洗菜 — 戶外自然綠 */
+#bg-canvas.scene-4 {
+  background: linear-gradient(160deg, #021206 0%, #061a08 35%, #0a2410 60%, #040e05 100%);
+}
+#bg-canvas.scene-4::before {
+  background: radial-gradient(ellipse, rgba(67,233,123,0.25) 0%, transparent 65%);
+  width: 350px; height: 350px; top: -60px; left: -60px;
+}
+#bg-canvas.scene-4::after {
+  background: radial-gradient(ellipse, rgba(56,249,215,0.15) 0%, transparent 70%);
+  width: 300px; height: 300px; bottom: 0; right: -50px; animation-delay: -5s;
+}
 
-  .bin {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 18px 10px; border-radius: 24px; background: #ffffff;
-    border: 2px solid #f1f5f9; cursor: pointer; transition: all 0.1s; 
-    box-shadow: 0 10px 20px rgba(0,0,0,0.03);
-  }
-  .bin:active { transform: scale(0.95); border-color: #10b981; }
-  .bin-icon { font-size: 42px; margin-bottom: 4px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
-  .bin-label { font-size: 16px; font-weight: 900; color: #475569; text-align: center; }
+/* L5 顧火擺盤 — 廚房爐火暖 */
+#bg-canvas.scene-5 {
+  background: linear-gradient(160deg, #120500 0%, #2a0d02 35%, #3d1500 60%, #1a0800 100%);
+}
+#bg-canvas.scene-5::before {
+  background: radial-gradient(ellipse at 50% 110%, rgba(255,80,0,0.45) 0%, rgba(255,140,0,0.2) 30%, transparent 65%);
+  width: 100%; height: 400px; bottom: -100px; top: auto; left: 0; border-radius: 0;
+  animation: fireFlicker 2s ease-in-out infinite alternate;
+}
+#bg-canvas.scene-5::after {
+  background: radial-gradient(ellipse, rgba(255,160,0,0.2) 0%, transparent 70%);
+  width: 280px; height: 280px; top: 0; left: 50%; transform: translateX(-50%); animation-delay: -1s;
+}
+@keyframes fireFlicker {
+  from { opacity: 0.8; transform: scaleY(1); }
+  to { opacity: 1; transform: scaleY(1.08); }
+}
 
-  /* 結算畫面 */
-  #result-screen { padding: 40px 24px; justify-content: center; }
-  .result-box { background: rgba(255,255,255,0.9); border-radius: 40px; padding: 40px 24px; text-align: center; margin-bottom: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); }
-  .res-emoji { font-size: 80px; margin-bottom: 16px; }
-  .res-title { font-size: 28px; font-weight: 900; color: #059669; margin-bottom: 8px; }
-  
-  .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; text-align: left; margin-bottom: 32px; margin-top: 24px;}
-  .metric-item { background: #f8fafc; padding: 16px; border-radius: 20px; border: 1px solid #e2e8f0; }
-  .m-label { font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 4px; }
-  .m-val { font-size: 22px; font-weight: 900; color: #0f172a; font-family: monospace; }
-  .hl-blue { color: #0284c7; } .hl-orange { color: #ea580c; } .hl-red { color: #e11d48; }
+.screen {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  display: none; flex-direction: column; z-index: 10;
+  animation: screenIn 0.4s var(--smooth) both;
+}
+.screen.active { display: flex; }
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── GLASSMORPHISM CARD ─── */
+.glass-card {
+  background: var(--c-card);
+  border: 1px solid var(--c-card-border);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 28px;
+}
+
+/* ─── BUTTONS ─── */
+.btn {
+  background: linear-gradient(135deg, var(--c-green) 0%, #00b8d9 100%);
+  color: #0a1a1a; font-size: 17px; font-weight: 900;
+  padding: 18px 24px; border: none; border-radius: 20px; cursor: pointer;
+  width: 100%; position: relative; overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,214,143,0.4), 0 1px 0 rgba(255,255,255,0.3) inset;
+  transition: transform 0.15s var(--spring), box-shadow 0.15s ease;
+  letter-spacing: 0.02em;
+}
+.btn::before {
+  content: '';
+  position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.4s ease;
+}
+.btn:active { transform: scale(0.96); box-shadow: 0 2px 12px rgba(0,214,143,0.3); }
+.btn:hover::before { left: 150%; }
+
+/* ─── HOME SCREEN ─── */
+#home-screen {
+  padding: 0; overflow-y: auto;
+  background: transparent;
+}
+
+.home-header {
+  padding: 56px 28px 32px;
+  position: relative;
+}
+.home-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(0,214,143,0.15); border: 1px solid rgba(0,214,143,0.3);
+  color: var(--c-green); font-size: 12px; font-weight: 800;
+  padding: 6px 14px; border-radius: 100px; margin-bottom: 20px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.home-title {
+  font-size: 34px; font-weight: 900; letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #fff 30%, var(--c-green) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; line-height: 1.15; margin-bottom: 10px;
+}
+.home-desc { font-size: 14px; color: var(--c-text-dim); font-weight: 700; }
+
+.levels-list { padding: 0 20px 40px; display: flex; flex-direction: column; gap: 14px; }
+
+.level-card {
+  background: var(--c-card);
+  border: 1px solid var(--c-card-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px; padding: 20px 22px;
+  cursor: pointer;
+  transition: transform 0.2s var(--spring), box-shadow 0.2s ease, border-color 0.2s ease;
+  display: flex; align-items: center; gap: 18px;
+  position: relative; overflow: hidden;
+}
+.level-card::after {
+  content: '›';
+  position: absolute; right: 22px; top: 50%; transform: translateY(-50%);
+  font-size: 24px; color: var(--c-text-dim); font-weight: 900;
+  transition: transform 0.2s var(--spring), color 0.2s;
+}
+.level-card:active { transform: scale(0.97); border-color: rgba(0,214,143,0.5); }
+.level-card:active::after { transform: translateY(-50%) translateX(4px); color: var(--c-green); }
+
+.lv-icon-wrap {
+  width: 56px; height: 56px; border-radius: 18px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+}
+.lv-icon-1 { background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%); border: 1px solid #667eea40; }
+.lv-icon-2 { background: linear-gradient(135deg, #f9844a20 0%, #fee14020 100%); border: 1px solid #f9844a40; }
+.lv-icon-3 { background: linear-gradient(135deg, #4facfe20 0%, #00f2fe20 100%); border: 1px solid #4facfe40; }
+.lv-icon-4 { background: linear-gradient(135deg, #43e97b20 0%, #38f9d720 100%); border: 1px solid #43e97b40; }
+.lv-icon-5 { background: linear-gradient(135deg, #fa709a20 0%, #fee14020 100%); border: 1px solid #fa709a40; }
+
+.lv-info { flex: 1; padding-right: 24px; }
+.lv-badge {
+  font-size: 11px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--c-green); margin-bottom: 4px;
+}
+.lv-title { font-size: 16px; font-weight: 800; color: var(--c-text); line-height: 1.3; }
+.lv-sub { font-size: 12px; color: var(--c-text-dim); margin-top: 2px; font-weight: 700; }
+
+/* ─── GAME HEADER ─── */
+#header {
+  padding: 20px 20px 16px;
+  background: rgba(15,12,41,0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--c-card-border);
+  z-index: 20; flex-shrink: 0;
+}
+
+.header-top {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
+}
+#level-label {
+  font-size: 12px; font-weight: 900; color: var(--c-green);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+#item-counter {
+  font-size: 12px; font-weight: 800; color: var(--c-text-dim);
+}
+
+#progress-bar {
+  width: 100%; height: 6px;
+  background: rgba(255,255,255,0.08); border-radius: 100px;
+  overflow: hidden; margin-bottom: 14px;
+}
+#progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--c-green) 0%, #00d2ff 100%);
+  width: 0%; transition: width 0.4s var(--smooth);
+  border-radius: 100px;
+  box-shadow: 0 0 10px rgba(0,214,143,0.6);
+  position: relative;
+}
+#progress-fill::after {
+  content: '';
+  position: absolute; right: -2px; top: -2px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 8px rgba(0,214,143,0.8);
+}
+
+#instruction {
+  font-size: 17px; font-weight: 900; line-height: 1.5;
+  min-height: 52px; display: flex; align-items: center; justify-content: center;
+  text-align: center; color: var(--c-text);
+}
+.hl-blue { color: #4facfe; font-weight: 900; }
+.hl-orange { color: #ffa94d; font-weight: 900; }
+.hl-red { color: #ff6b8a; font-weight: 900; }
+
+/* ─── GAME AREA ─── */
+#game-area {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+
+/* Item Display — 3D Neumorphic Card */
+#item-display {
+  width: 160px; height: 160px; border-radius: 40px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 84px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%);
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.05),
+    0 20px 60px rgba(0,0,0,0.5),
+    0 4px 12px rgba(0,0,0,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: transform 0.3s var(--spring), opacity 0.3s ease, background 0.3s ease;
+  position: relative;
+  animation: itemAppear 0.4s var(--spring) both;
+}
+
+@keyframes itemAppear {
+  from { transform: scale(0.5) translateY(30px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* Glow ring around item — NOT used for L1 */
+#item-display::before {
+  content: '';
+  position: absolute; inset: -3px;
+  border-radius: 44px;
+  background: linear-gradient(135deg, var(--c-green), #4facfe, var(--c-green));
+  background-size: 200% 200%;
+  animation: glowRotate 3s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+/* Only activate glow ring on non-L1 items */
+#item-display.glowing::before { opacity: 1; }
+/* L1 pulse animations — border only, no overlay */
+@keyframes pulseDark {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(130,100,255,0.6), 0 20px 60px rgba(0,0,0,0.7); }
+  50% { box-shadow: 0 0 0 8px rgba(130,100,255,0), 0 20px 60px rgba(0,0,0,0.7); }
+}
+@keyframes pulseLight {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,210,0,0.7), 0 20px 60px rgba(255,200,0,0.2); }
+  50% { box-shadow: 0 0 0 8px rgba(255,210,0,0), 0 20px 60px rgba(255,200,0,0.2); }
+}
+#item-display.pulse-dark { animation: itemAppear 0.4s var(--spring) both, pulseDark 1.5s ease-in-out 0.4s infinite; }
+#item-display.pulse-light { animation: itemAppear 0.4s var(--spring) both, pulseLight 1.5s ease-in-out 0.4s infinite; }
+@keyframes glowRotate {
+  from { background-position: 0% 50%; }
+  to { background-position: 200% 50%; }
+}
+
+/* ─── ANIMATIONS ─── */
+@keyframes shake {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  15% { transform: translateX(-14px) rotate(-10deg); }
+  30% { transform: translateX(14px) rotate(10deg); }
+  45% { transform: translateX(-10px) rotate(-6deg); }
+  60% { transform: translateX(10px) rotate(6deg); }
+  75% { transform: translateX(-6px) rotate(-3deg); }
+  90% { transform: translateX(6px) rotate(3deg); }
+}
+.shake-error {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both !important;
+  border-color: var(--c-red) !important;
+  box-shadow: 0 0 0 3px rgba(255,77,109,0.4), 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+}
+
+/* CSS trajectory flight animation */
+.fly-to-bin {
+  transition: none !important;
+  animation: flyToBin 0.45s cubic-bezier(0.4, 0, 0.6, 1) forwards !important;
+}
+@keyframes flyToBin {
+  0% { transform: scale(1) translate(0, 0) rotate(0deg); opacity: 1; }
+  30% { transform: scale(1.15) translate(var(--fly-x-mid, 0px), -60px) rotate(var(--fly-rot, -15deg)); opacity: 1; }
+  100% { transform: scale(0.2) translate(var(--fly-x, 0px), var(--fly-y, 120px)) rotate(var(--fly-rot, -30deg)); opacity: 0; }
+}
+
+/* ─── PARTICLES (pure CSS) ─── */
+.particle-burst {
+  position: absolute; pointer-events: none; z-index: 100;
+  width: 0; height: 0;
+}
+.particle-burst .p {
+  position: absolute;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  animation: particleFly 0.7s ease-out forwards;
+  transform-origin: center;
+}
+@keyframes particleFly {
+  0% { transform: translate(0,0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--px), var(--py)) scale(0); opacity: 0; }
+}
+.star-burst .p { border-radius: 2px; transform: rotate(45deg); }
+
+/* ─── SUCCESS STAR GLOW ─── */
+@keyframes successPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0,214,143,0.6), 0 20px 60px rgba(0,0,0,0.5); }
+  50% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(0,214,143,0), 0 20px 60px rgba(0,0,0,0.5); }
+  100% { transform: scale(0.3) translateY(80px); opacity: 0; }
+}
+.success-pop {
+  animation: successPulse 0.4s var(--smooth) forwards !important;
+}
+
+/* ─── OVERLAY ALERT ─── */
+.overlay-alert {
+  position: absolute; top: 12%; left: 8%; width: 84%;
+  background: linear-gradient(135deg, rgba(255,77,109,0.95) 0%, rgba(200,40,80,0.95) 100%);
+  padding: 22px 20px; border-radius: 28px; color: white;
+  text-align: center; font-weight: 900; font-size: 20px;
+  box-shadow: 0 20px 60px rgba(255,77,109,0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+  border: 1px solid rgba(255,255,255,0.2);
+  transform: scale(0) translateY(-20px); opacity: 0;
+  transition: transform 0.35s var(--spring), opacity 0.35s ease;
+  z-index: 100;
+}
+.overlay-alert.show { transform: scale(1) translateY(0); opacity: 1; }
+
+/* ─── PARALLEL TASK (BOILING) ─── */
+#parallel-task {
+  position: absolute; top: 16px; right: 16px;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7c59f 100%);
+  padding: 14px 18px; border-radius: 22px; color: #1a0a00;
+  font-size: 14px; font-weight: 900;
+  box-shadow: 0 8px 32px rgba(255,107,53,0.5), inset 0 1px 0 rgba(255,255,255,0.4);
+  border: 1px solid rgba(255,255,255,0.3);
+  transform: scale(0) rotate(-10deg); opacity: 0;
+  transition: transform 0.35s var(--spring), opacity 0.3s ease;
+  z-index: 50; display: flex; flex-direction: column; align-items: center; cursor: pointer;
+}
+#parallel-task.show {
+  transform: scale(1) rotate(0deg); opacity: 1;
+  animation: boilPulse 0.6s ease-in-out infinite alternate;
+}
+@keyframes boilPulse {
+  from { box-shadow: 0 8px 32px rgba(255,107,53,0.5); transform: scale(1) rotate(-2deg); }
+  to { box-shadow: 0 12px 40px rgba(255,107,53,0.7); transform: scale(1.06) rotate(2deg); }
+}
+
+/* ─── BINS CONTAINER ─── */
+#bins-container {
+  padding: 16px 16px 32px;
+  background: rgba(15,12,41,0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--c-card-border);
+  display: grid; gap: 12px;
+  flex-shrink: 0;
+}
+
+.layout-horizontal { grid-template-columns: 1fr 1fr; }
+.layout-vertical { grid-template-columns: 1fr; }
+.layout-asym { grid-template-columns: 2fr 1fr; }
+
+/* ─── BIN BUTTONS ─── */
+.bin {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 20px 12px; border-radius: 24px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  cursor: pointer;
+  transition: transform 0.2s var(--spring), box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  position: relative; overflow: hidden;
+}
+.bin::before {
+  content: ''; position: absolute; inset: 0; border-radius: 24px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+  pointer-events: none;
+}
+.bin:active {
+  transform: scale(0.94);
+  border-color: var(--c-green);
+  box-shadow: 0 0 0 2px rgba(0,214,143,0.3), 0 4px 20px rgba(0,214,143,0.2);
+  background: rgba(0,214,143,0.1);
+}
+
+.bin-icon { font-size: 44px; margin-bottom: 6px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); transition: transform 0.2s var(--spring); }
+.bin:active .bin-icon { transform: scale(0.9); }
+.bin-label { font-size: 14px; font-weight: 900; color: var(--c-text); text-align: center; letter-spacing: 0.01em; }
+
+/* Level-specific bin decorations */
+
+/* L1 — Washing Machine bins */
+.bin-washer {
+  background: linear-gradient(145deg, rgba(102,126,234,0.15) 0%, rgba(118,75,162,0.1) 100%) !important;
+  border-color: rgba(102,126,234,0.3) !important;
+}
+.bin-washer .bin-icon-wrap {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: linear-gradient(145deg, #1e1b3a, #2d2760);
+  border: 3px solid rgba(102,126,234,0.5);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; margin-bottom: 6px;
+  box-shadow: 0 4px 20px rgba(102,126,234,0.3), inset 0 2px 0 rgba(255,255,255,0.1);
+  position: relative;
+}
+.bin-washer .bin-icon-wrap::after {
+  content: '';
+  position: absolute; inset: 4px; border-radius: 50%;
+  border: 2px dashed rgba(102,126,234,0.4);
+  animation: spinRing 4s linear infinite;
+}
+@keyframes spinRing { to { transform: rotate(360deg); } }
+
+/* L3 — Fridge bins (vertical) */
+.layout-vertical .bin {
+  flex-direction: row; gap: 16px; padding: 16px 24px; justify-content: flex-start;
+}
+.bin-fridge {
+  background: linear-gradient(135deg, rgba(79,172,254,0.12) 0%, rgba(0,242,254,0.06) 100%) !important;
+  border-color: rgba(79,172,254,0.25) !important;
+}
+.bin-fridge-shelf {
+  width: 100%; height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(79,172,254,0.5), transparent);
+  position: absolute; bottom: 0; left: 0;
+}
+
+/* L4 — Asymmetric bins */
+.layout-asym #bin-good {
+  background: linear-gradient(135deg, rgba(0,214,143,0.15) 0%, rgba(0,178,255,0.08) 100%) !important;
+  border-color: rgba(0,214,143,0.3) !important;
+}
+.layout-asym #bin-bad {
+  background: linear-gradient(135deg, rgba(255,77,109,0.1) 0%, rgba(100,0,30,0.1) 100%) !important;
+  border-color: rgba(255,77,109,0.2) !important;
+}
+
+/* L5 — Placemat bins */
+.bin-placemat-left {
+  background: linear-gradient(145deg, rgba(76,175,80,0.15) 0%, rgba(0,150,136,0.1) 100%) !important;
+  border-color: rgba(76,175,80,0.3) !important;
+}
+.bin-placemat-right {
+  background: linear-gradient(145deg, rgba(255,152,0,0.15) 0%, rgba(244,67,54,0.1) 100%) !important;
+  border-color: rgba(255,152,0,0.3) !important;
+}
+.bin-placemat-left .bin-icon, .bin-placemat-right .bin-icon { font-size: 38px; }
+
+/* ─── BIN HIT FLASH ─── */
+@keyframes binHit {
+  0% { background: rgba(0,214,143,0.25); border-color: var(--c-green); }
+  100% { background: var(--c-card); border-color: var(--c-card-border); }
+}
+.bin-hit { animation: binHit 0.4s ease-out forwards; }
+
+/* ─── BIN CATCH BOUNCE ─── */
+@keyframes binCatch {
+  0%   { transform: scale(1); }
+  25%  { transform: scale(0.88) translateY(6px); }
+  55%  { transform: scale(1.08) translateY(-4px); }
+  75%  { transform: scale(0.97) translateY(2px); }
+  100% { transform: scale(1) translateY(0); }
+}
+.bin-catching { animation: binCatch 0.45s var(--spring) forwards !important; }
+
+/* ─── RESULT SCREEN ─── */
+#result-screen {
+  padding: 0; justify-content: flex-start; overflow-y: auto;
+}
+.result-scroll { padding: 50px 24px 40px; }
+
+.result-hero {
+  text-align: center; margin-bottom: 28px;
+  animation: heroEnter 0.6s var(--spring) both;
+}
+@keyframes heroEnter {
+  from { opacity: 0; transform: scale(0.6) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.res-emoji {
+  font-size: 80px; display: block; margin-bottom: 16px;
+  filter: drop-shadow(0 0 30px rgba(0,214,143,0.5));
+  animation: trophyFloat 3s ease-in-out infinite;
+}
+@keyframes trophyFloat {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-10px) rotate(3deg); }
+}
+.res-title {
+  font-size: 30px; font-weight: 900;
+  background: linear-gradient(135deg, #fff 20%, var(--c-green) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  margin-bottom: 4px;
+}
+.res-sub { font-size: 14px; color: var(--c-text-dim); font-weight: 700; }
+
+.metric-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin-bottom: 28px;
+}
+.metric-item {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 18px 16px; border-radius: 22px;
+  animation: metricSlide 0.5s var(--spring) both;
+}
+.metric-item:nth-child(1) { animation-delay: 0.1s; }
+.metric-item:nth-child(2) { animation-delay: 0.2s; }
+.metric-item:nth-child(3) { animation-delay: 0.3s; }
+.metric-item:nth-child(4) { animation-delay: 0.4s; }
+@keyframes metricSlide {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.m-label { font-size: 11px; font-weight: 800; color: var(--c-text-dim); margin-bottom: 8px; letter-spacing: 0.05em; text-transform: uppercase; }
+.m-val { font-size: 26px; font-weight: 900; color: var(--c-text); font-family: 'Nunito', monospace; }
+.m-unit { font-size: 12px; font-weight: 700; color: var(--c-text-dim); margin-left: 2px; }
+.m-icon { font-size: 20px; margin-bottom: 6px; display: block; }
+
+/* ─── L1 COLOR ITEM STYLES ─── */
+/* DARK: near-black with deep indigo shimmer — unmistakably dark */
+#item-display.item-dark {
+  background: linear-gradient(145deg, #0d0b1e 0%, #1a1040 50%, #0a0818 100%) !important;
+  border: 2px solid rgba(130,100,255,0.6) !important;
+  box-shadow: 0 0 0 1px rgba(130,100,255,0.2), 0 20px 60px rgba(0,0,0,0.7), inset 0 1px 0 rgba(130,100,255,0.3) !important;
+}
+#item-display.item-dark #item-emoji {
+  filter: drop-shadow(0 0 12px rgba(130,100,255,0.8)) brightness(1.3);
+}
+/* LIGHT: bright warm white — unmistakably light */
+#item-display.item-light {
+  background: linear-gradient(145deg, #fffef0 0%, #fff9d0 50%, #fffbe0 100%) !important;
+  border: 2px solid rgba(255,210,0,0.7) !important;
+  box-shadow: 0 0 0 1px rgba(255,210,0,0.3), 0 20px 60px rgba(255,200,0,0.2), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+}
+#item-display.item-light #item-emoji {
+  filter: drop-shadow(0 0 8px rgba(255,180,0,0.5)) brightness(0.85);
+}
+
+/* L1: dark washer bin — dark navy */
+#bin-dark.bin-washer {
+  background: linear-gradient(145deg, rgba(20,16,60,0.85) 0%, rgba(10,8,40,0.9) 100%) !important;
+  border-color: rgba(130,100,255,0.5) !important;
+  box-shadow: inset 0 1px 0 rgba(130,100,255,0.2) !important;
+}
+#bin-dark .bin-icon-wrap {
+  background: linear-gradient(145deg, #0d0b1e, #1a1040) !important;
+  border-color: rgba(130,100,255,0.6) !important;
+  box-shadow: 0 4px 20px rgba(130,100,255,0.3), inset 0 2px 0 rgba(130,100,255,0.2) !important;
+}
+/* L1: light washer bin — warm cream */
+#bin-light.bin-washer {
+  background: linear-gradient(145deg, rgba(255,252,220,0.25) 0%, rgba(255,245,180,0.2) 100%) !important;
+  border-color: rgba(255,210,0,0.5) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,200,0.3) !important;
+}
+#bin-light .bin-icon-wrap {
+  background: linear-gradient(145deg, #fffef0, #fff9d0) !important;
+  border-color: rgba(255,210,0,0.6) !important;
+  box-shadow: 0 4px 20px rgba(255,180,0,0.25), inset 0 2px 0 rgba(255,255,255,0.6) !important;
+}
 </style>
 </head>
 <body>
 
 <div id="app-container">
+  <div id="bg-canvas"></div>
 
+  <!-- ── HOME SCREEN ── -->
   <div id="home-screen" class="screen active">
-    <div class="home-title">家事達人的一天</div>
-    <div class="home-desc">請選擇情境。每局固定 10 件家事。</div>
-    
-    <div class="level-card" onclick="startGame(1)">
-      <div class="lv-badge">L1 晨間洗衣</div><div class="lv-title">深淺分類 (基礎反應)</div>
+    <div class="home-header">
+      <div class="home-badge">🧠 認知評估遊戲</div>
+      <div class="home-title">家事達人<br>的一天</div>
+      <div class="home-desc">選擇情境，完成 10 件家事任務</div>
     </div>
-    <div class="level-card" onclick="startGame(2)">
-      <div class="lv-badge">L2 午後收衣</div><div class="lv-title">衣物歸位 (工作記憶)</div>
-    </div>
-    <div class="level-card" onclick="startGame(3)">
-      <div class="lv-badge">L3 冰箱收納</div><div class="lv-title">生鮮分類 (認知彈性)</div>
-    </div>
-    <div class="level-card" onclick="startGame(4)">
-      <div class="lv-badge">L4 挑菜洗菜</div><div class="lv-title">挑除菜蟲 (抑制控制)</div>
-    </div>
-    <div class="level-card" onclick="startGame(5)">
-      <div class="lv-badge">L5 顧火擺盤</div><div class="lv-title">沸騰關火 (分配注意力)</div>
+    <div class="levels-list">
+      <div class="level-card" onclick="startGame(1)">
+        <div class="lv-icon-wrap lv-icon-1">🌅</div>
+        <div class="lv-info">
+          <div class="lv-badge">L1 · 晨間洗衣</div>
+          <div class="lv-title">深淺分類</div>
+          <div class="lv-sub">基礎反應能力</div>
+        </div>
+      </div>
+      <div class="level-card" onclick="startGame(2)">
+        <div class="lv-icon-wrap lv-icon-2">☀️</div>
+        <div class="lv-info">
+          <div class="lv-badge">L2 · 午後收衣</div>
+          <div class="lv-title">衣物歸位</div>
+          <div class="lv-sub">工作記憶能力</div>
+        </div>
+      </div>
+      <div class="level-card" onclick="startGame(3)">
+        <div class="lv-icon-wrap lv-icon-3">🌤️</div>
+        <div class="lv-info">
+          <div class="lv-badge">L3 · 冰箱收納</div>
+          <div class="lv-title">生鮮分類</div>
+          <div class="lv-sub">認知彈性能力</div>
+        </div>
+      </div>
+      <div class="level-card" onclick="startGame(4)">
+        <div class="lv-icon-wrap lv-icon-4">🌿</div>
+        <div class="lv-info">
+          <div class="lv-badge">L4 · 挑菜洗菜</div>
+          <div class="lv-title">挑除菜蟲</div>
+          <div class="lv-sub">抑制控制能力</div>
+        </div>
+      </div>
+      <div class="level-card" onclick="startGame(5)">
+        <div class="lv-icon-wrap lv-icon-5">🍳</div>
+        <div class="lv-info">
+          <div class="lv-badge">L5 · 顧火擺盤</div>
+          <div class="lv-title">沸騰關火</div>
+          <div class="lv-sub">分配注意力能力</div>
+        </div>
+      </div>
     </div>
   </div>
 
+  <!-- ── GAME SCREEN ── -->
   <div id="game-screen" class="screen">
     <div id="header">
+      <div class="header-top">
+        <div id="level-label">L1 · 晨間洗衣</div>
+        <div id="item-counter">0 / 10</div>
+      </div>
       <div id="progress-bar"><div id="progress-fill"></div></div>
       <div id="instruction">準備中...</div>
     </div>
 
     <div id="game-area">
       <div id="item-display"><div id="item-emoji">👕</div></div>
-      
-      <div id="rule-alert" class="overlay-alert">⚠️ 哎呀記錯了！<br><span id="rule-alert-msg" style="font-size:16px; font-weight:400; margin-top:8px; display:block;">規則反轉</span></div>
-      
+
+      <div id="rule-alert" class="overlay-alert">
+        ⚡ 規則反轉！<br>
+        <span id="rule-alert-msg" style="font-size:15px; font-weight:700; margin-top:8px; display:block; opacity:0.9;">規則反轉</span>
+      </div>
+
       <div id="parallel-task" onclick="handleParallelTask()">
-        <span style="font-size: 36px;">🥘</span>
-        <span style="font-size: 14px; margin-top: 4px;">快關小火</span>
+        <span style="font-size: 34px;">🫕</span>
+        <span style="font-size: 13px; margin-top: 4px; font-weight:900;">快關小火！</span>
       </div>
     </div>
 
     <div id="bins-container"></div>
   </div>
 
+  <!-- ── RESULT SCREEN ── -->
   <div id="result-screen" class="screen">
-    <div class="result-box">
-      <div class="res-emoji">🎉</div>
-      <div class="res-title">家事達人！</div>
-      <div class="metric-grid">
-        <div class="metric-item"><div class="m-label">處理反應時間</div><div class="m-val"><span id="res-planning">0</span> <span style="font-size:12px">ms</span></div></div>
-        <div class="metric-item"><div class="m-label">衝動誤點</div><div class="m-val"><span id="res-commission">0</span> <span style="font-size:12px">次</span></div></div>
-        <div class="metric-item"><div class="m-label">切換停頓時間</div><div class="m-val"><span id="res-reconfig">N/A</span> <span style="font-size:12px">ms</span></div></div>
-        <div class="metric-item"><div class="m-label">無效盲動次數</div><div class="m-val"><span id="res-redundant">0</span> <span style="font-size:12px">次</span></div></div>
+    <div class="result-scroll">
+      <div class="result-hero">
+        <span class="res-emoji">🏆</span>
+        <div class="res-title">家事達人！</div>
+        <div class="res-sub">本局任務完成報告</div>
       </div>
-      <button class="btn" onclick="showScreen('home-screen')">返回選單</button>
+      <div class="metric-grid">
+        <div class="metric-item">
+          <span class="m-icon">⚡</span>
+          <div class="m-label">處理反應時間</div>
+          <div class="m-val" style="color:#4facfe"><span id="res-planning">0</span><span class="m-unit">ms</span></div>
+        </div>
+        <div class="metric-item">
+          <span class="m-icon">🎯</span>
+          <div class="m-label">衝動誤點</div>
+          <div class="m-val" style="color:#ff6b8a"><span id="res-commission">0</span><span class="m-unit">次</span></div>
+        </div>
+        <div class="metric-item">
+          <span class="m-icon">🔄</span>
+          <div class="m-label">切換停頓時間</div>
+          <div class="m-val" style="color:#ffa94d"><span id="res-reconfig">N/A</span><span class="m-unit" id="reconfig-unit">ms</span></div>
+        </div>
+        <div class="metric-item">
+          <span class="m-icon">🌀</span>
+          <div class="m-label">無效盲動次數</div>
+          <div class="m-val" style="color:#a78bfa"><span id="res-redundant">0</span><span class="m-unit">次</span></div>
+        </div>
+      </div>
+      <button class="btn" onclick="showScreen('home-screen')">↩ 返回選單</button>
     </div>
   </div>
 
@@ -198,32 +788,43 @@
 <script>
 const TOTAL_ITEMS = 10;
 
+const LEVEL_META = {
+  1: { label: 'L1 · 晨間洗衣', bgAccent: 'rgba(102,126,234,0.15)' },
+  2: { label: 'L2 · 午後收衣', bgAccent: 'rgba(249,132,74,0.12)' },
+  3: { label: 'L3 · 冰箱收納', bgAccent: 'rgba(79,172,254,0.12)' },
+  4: { label: 'L4 · 挑菜洗菜', bgAccent: 'rgba(67,233,123,0.12)' },
+  5: { label: 'L5 · 顧火擺盤', bgAccent: 'rgba(250,112,154,0.12)' },
+};
+
 const LEVEL_CONFIGS = {
   1: {
     inst: "請將衣服依<span class='hl-blue'>深淺色</span>丟入洗衣機",
-    bins: [ { id: 'dark', icon: '🎛️', label: '深色機' }, { id: 'light', icon: '🎛️', label: '淺色機' } ],
+    bins: [ { id: 'dark', icon: '🌑', label: '深色機' }, { id: 'light', icon: '🌕', label: '淺色機' } ],
     layoutClass: 'layout-horizontal',
+    binClass: 'bin-washer',
     generate: () => {
       const isDark = Math.random() > 0.5;
-      // 徹底拔除 OS Emoji 色差，統一用T恤，但賦予絕對的深色/淺色 CSS 背景
-      return { 
-        emoji: '👕', 
+      return {
+        emoji: '👕',
         correctBin: isDark ? 'dark' : 'light',
-        itemStyle: isDark ? 'background-color: #1e293b; color: #fff;' : 'background-color: #fdfccb; color: #000;'
+        itemStyle: isDark ? 'item-dark' : 'item-light',
+        flyDir: isDark ? 'left' : 'right'
       };
     }
   },
   2: {
     inst: "收衣服囉！請分類進<span class='hl-blue'>收納籃</span>",
-    bins: [ 
+    bins: [
       { id: 'top', icon: '🧺', label: '上衣' }, { id: 'bottom', icon: '🧺', label: '褲子' },
       { id: 'sock', icon: '🧺', label: '襪子' }, { id: 'underwear', icon: '🧺', label: '內衣褲' }
     ],
-    layoutClass: 'layout-horizontal', // 會自動斷行變 2x2
+    layoutClass: 'layout-horizontal',
     generate: () => {
       const types = [
-        { type: 'top', emojis: ['👕','🧥','👔'] }, { type: 'bottom', emojis: ['👖','🩳'] },
-        { type: 'sock', emojis: ['🧦'] }, { type: 'underwear', emojis: ['🩲'] }
+        { type: 'top', emojis: ['👕','🧥','👔'] },
+        { type: 'bottom', emojis: ['👖','🩳'] },
+        { type: 'sock', emojis: ['🧦'] },
+        { type: 'underwear', emojis: ['🩲'] }
       ];
       const selected = types[Math.floor(Math.random() * types.length)];
       return { emoji: selected.emojis[Math.floor(Math.random() * selected.emojis.length)], correctBin: selected.type, itemStyle: '' };
@@ -232,7 +833,8 @@ const LEVEL_CONFIGS = {
   3: {
     inst: "蔬菜放<span class='hl-blue'>上層</span>，肉類放<span class='hl-orange'>下層</span>",
     bins: [ { id: 'veg', icon: '🧊', label: '上層 (蔬菜)' }, { id: 'meat', icon: '🧊', label: '下層 (肉類)' } ],
-    layoutClass: 'layout-vertical', // 垂直堆疊，模擬真冰箱
+    layoutClass: 'layout-vertical',
+    binClass: 'bin-fridge',
     generate: (state) => {
       const isVeg = Math.random() > 0.5;
       const emoji = isVeg ? ['🥦','🥬','🥕'][Math.floor(Math.random()*3)] : ['🥩','🍗','🥓'][Math.floor(Math.random()*3)];
@@ -242,9 +844,9 @@ const LEVEL_CONFIGS = {
   4: {
     inst: "健康蔬菜放<span class='hl-blue'>大盆子</span>，菜蟲請挑去<span class='hl-red'>垃圾桶</span>！",
     bins: [ { id: 'good', icon: '🥣', label: '大洗菜盆' }, { id: 'bad', icon: '🗑️', label: '垃圾桶' } ],
-    layoutClass: 'layout-asym', // 不對稱排版：大盆子 + 小垃圾桶
+    layoutClass: 'layout-asym',
     generate: () => {
-      const isBad = Math.random() > 0.7; 
+      const isBad = Math.random() > 0.7;
       const emoji = isBad ? ['🐛','🕷️'][Math.floor(Math.random()*2)] : ['🥬','🥦'][Math.floor(Math.random()*2)];
       return { emoji, correctBin: isBad ? 'bad' : 'good', itemStyle: '' };
     }
@@ -260,6 +862,7 @@ const LEVEL_CONFIGS = {
   }
 };
 
+/* ─── STATE ─── */
 let gs = {
   level: 1, currentCount: 0, isLocked: false, currentItem: {}, itemSpawnTime: 0,
   waitingForReconfig: false, isBoiling: false,
@@ -270,6 +873,45 @@ const elItem = document.getElementById('item-display');
 const elInst = document.getElementById('instruction');
 const elBins = document.getElementById('bins-container');
 
+/* ─── WEB AUDIO ENGINE ─── */
+let audioCtx = null;
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq, type, duration, gainVal, delay = 0) {
+  try {
+    const ctx = getAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type; osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+    gain.gain.setValueAtTime(0, ctx.currentTime + delay);
+    gain.gain.linearRampToValueAtTime(gainVal, ctx.currentTime + delay + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration);
+    osc.start(ctx.currentTime + delay);
+    osc.stop(ctx.currentTime + delay + duration);
+  } catch(e) {}
+}
+function sfxSuccess() {
+  playTone(520, 'sine', 0.12, 0.3);
+  playTone(660, 'sine', 0.12, 0.25, 0.08);
+  playTone(880, 'sine', 0.18, 0.2, 0.16);
+}
+function sfxError() {
+  playTone(220, 'sawtooth', 0.15, 0.25);
+  playTone(180, 'sawtooth', 0.15, 0.2, 0.1);
+}
+function sfxBoilAlert() {
+  playTone(880, 'square', 0.08, 0.15);
+  playTone(880, 'square', 0.08, 0.15, 0.15);
+  playTone(1100, 'square', 0.1, 0.2, 0.30);
+}
+function sfxBoilOff() {
+  playTone(660, 'sine', 0.15, 0.2);
+  playTone(440, 'sine', 0.2, 0.15, 0.12);
+}
+
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -277,53 +919,89 @@ function showScreen(id) {
 
 function startGame(level) {
   gs = {
-    level: level, currentCount: 0, isLocked: false, currentItem: {}, itemSpawnTime: 0,
+    level, currentCount: 0, isLocked: false, currentItem: {}, itemSpawnTime: 0,
     waitingForReconfig: false, isBoiling: false,
     metrics: { latencies: [], reconfigLatency: null, commission: 0, redundant: 0 }
   };
-  
+
+  // Switch scene background
+  const bg = document.getElementById('bg-canvas');
+  bg.className = 'scene-' + level;
+
   document.getElementById('progress-fill').style.width = '0%';
   document.getElementById('rule-alert').classList.remove('show');
   document.getElementById('parallel-task').classList.remove('show');
-  
+  document.getElementById('level-label').textContent = LEVEL_META[level].label;
+  updateCounter();
+
   renderBins();
   elInst.innerHTML = LEVEL_CONFIGS[level].inst;
-  
+
+  // Reset item display
+  elItem.className = '';
+  elItem.style.cssText = '';
+  document.getElementById('item-emoji').innerText = '⏳';
+
   showScreen('game-screen');
   setTimeout(spawnNextItem, 600);
 }
 
+function updateCounter() {
+  document.getElementById('item-counter').textContent = `${gs.currentCount} / ${TOTAL_ITEMS}`;
+}
+
 function renderBins() {
   const config = LEVEL_CONFIGS[gs.level];
-  // 注入專屬版型 Class
-  elBins.className = config.layoutClass;
-  elBins.innerHTML = config.bins.map(b => `
-    <div class="bin" id="bin-${b.id}" onclick="handleBinTap('${b.id}')">
-      <div class="bin-icon">${b.icon}</div>
-      <div class="bin-label" id="label-${b.id}">${b.label}</div>
-    </div>
-  `).join('');
+  elBins.className = 'bins-base ' + config.layoutClass;
+
+  elBins.innerHTML = config.bins.map(b => {
+    // Build inner icon markup
+    let iconMarkup;
+    if (config.binClass === 'bin-washer') {
+      iconMarkup = `<div class="bin-icon-wrap">${b.icon}</div>`;
+    } else {
+      iconMarkup = `<div class="bin-icon">${b.icon}</div>`;
+    }
+
+    // Extra classes
+    let extraClass = config.binClass || '';
+    if (gs.level === 5) {
+      extraClass += b.id === 'bowl' ? ' bin-placemat-left' : ' bin-placemat-right';
+    }
+    if (gs.level === 3) extraClass = 'bin-fridge';
+
+    return `
+      <div class="bin ${extraClass}" id="bin-${b.id}" onclick="handleBinTap('${b.id}')">
+        ${iconMarkup}
+        <div class="bin-label" id="label-${b.id}">${b.label}</div>
+        ${gs.level === 3 ? '<div class="bin-fridge-shelf"></div>' : ''}
+      </div>
+    `;
+  }).join('');
 }
 
 function spawnNextItem() {
   if (gs.currentCount >= TOTAL_ITEMS) return endGame();
 
+  // Reset item
   elItem.className = '';
-  
+  elItem.style.cssText = '';
+  elItem.style.animation = 'none';
+  void elItem.offsetWidth;
+  elItem.style.animation = '';
+
   if (gs.level === 3 && gs.currentCount === 5 && !gs.waitingForReconfig) {
     gs.waitingForReconfig = true;
     document.getElementById('rule-alert-msg').innerText = "蔬菜改放下層，肉類改放上層！";
     document.getElementById('rule-alert').classList.add('show');
-    
-    setTimeout(() => { 
+
+    setTimeout(() => {
       document.getElementById('rule-alert').classList.remove('show');
-      // 動態對調按鈕位置 (透過 flex-direction 或 DOM 排序)
-      elBins.appendChild(document.getElementById('bin-veg')); 
+      elBins.appendChild(document.getElementById('bin-veg'));
       document.getElementById('label-veg').innerText = "下層 (蔬菜)";
       document.getElementById('label-meat').innerText = "上層 (肉類)";
       elInst.innerHTML = "蔬菜放<span class='hl-orange'>下層</span>，肉類放<span class='hl-blue'>上層</span>";
-      
-      generateAndRender(); 
+      generateAndRender();
     }, 2500);
     return;
   }
@@ -331,6 +1009,7 @@ function spawnNextItem() {
   if (gs.level === 5 && Math.random() > 0.7 && gs.currentCount > 0) {
     gs.isBoiling = true;
     document.getElementById('parallel-task').classList.add('show');
+    sfxBoilAlert();
   }
 
   generateAndRender();
@@ -339,11 +1018,26 @@ function spawnNextItem() {
 function generateAndRender() {
   const data = LEVEL_CONFIGS[gs.level].generate(gs);
   gs.currentItem = data;
+
   document.getElementById('item-emoji').innerText = data.emoji;
-  
-  // L1 專用：絕對顏色覆寫
-  elItem.style.cssText = data.itemStyle;
-  
+
+  // Apply visual class
+  elItem.className = '';
+  if (data.itemStyle) elItem.classList.add(data.itemStyle);
+
+  // L1: skip glowing entirely (it overwrites the dark/light color signal)
+  // Use a pulsing border animation instead, color-matched to dark/light
+  if (gs.level === 1) {
+    elItem.classList.add(data.correctBin === 'dark' ? 'pulse-dark' : 'pulse-light');
+  } else {
+    elItem.classList.add('glowing');
+  }
+
+  // Trigger re-enter animation
+  elItem.style.animation = 'none';
+  void elItem.offsetWidth;
+  elItem.style.animation = '';
+
   gs.itemSpawnTime = Date.now();
   gs.isLocked = false;
 }
@@ -352,14 +1046,62 @@ function handleParallelTask() {
   if (!gs.isBoiling) return;
   gs.isBoiling = false;
   document.getElementById('parallel-task').classList.remove('show');
+  sfxBoilOff();
   const btn = document.getElementById('parallel-task');
   btn.style.transform = "scale(0.8)";
   setTimeout(() => btn.style.transform = "", 150);
 }
 
+function getBinPosition(binId) {
+  const binEl = document.getElementById('bin-' + binId);
+  const itemRect = elItem.getBoundingClientRect();
+  const binRect = binEl.getBoundingClientRect();
+  const dx = (binRect.left + binRect.width/2) - (itemRect.left + itemRect.width/2);
+  const dy = (binRect.top + binRect.height/2) - (itemRect.top + itemRect.height/2);
+  return { dx, dy };
+}
+
+function spawnParticles(success) {
+  const existing = document.querySelector('.particle-burst');
+  if (existing) existing.remove();
+
+  const burst = document.createElement('div');
+  burst.className = 'particle-burst ' + (success ? 'star-burst' : '');
+
+  const itemRect = elItem.getBoundingClientRect();
+  const appRect = document.getElementById('app-container').getBoundingClientRect();
+  burst.style.left = (itemRect.left - appRect.left + itemRect.width/2) + 'px';
+  burst.style.top = (itemRect.top - appRect.top + itemRect.height/2) + 'px';
+
+  const colors = success
+    ? ['#00d68f','#4facfe','#ffd700','#fff','#00f2fe']
+    : ['#ff4d6d','#ff8a80','#ffab40'];
+  const count = success ? 12 : 6;
+
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'p';
+    const angle = (i / count) * Math.PI * 2;
+    const dist = success ? (40 + Math.random() * 50) : (20 + Math.random() * 30);
+    p.style.cssText = `
+      --px: ${Math.cos(angle) * dist}px;
+      --py: ${Math.sin(angle) * dist}px;
+      background: ${colors[i % colors.length]};
+      width: ${success ? 8 : 6}px; height: ${success ? 8 : 6}px;
+      animation-delay: ${i * 20}ms;
+      animation-duration: ${success ? 0.7 : 0.5}s;
+      left: -4px; top: -4px;
+    `;
+    burst.appendChild(p);
+  }
+
+  document.getElementById('game-area').appendChild(burst);
+  setTimeout(() => burst.remove(), 800);
+}
+
 function handleBinTap(binId) {
   if (gs.isLocked) return;
-  
+
   if (gs.isBoiling) {
     gs.metrics.redundant++;
     triggerErrorAnim();
@@ -367,12 +1109,14 @@ function handleBinTap(binId) {
   }
 
   const now = Date.now();
-  
+  const binEl = document.getElementById('bin-' + binId);
+
   if (binId === gs.currentItem.correctBin) {
     gs.isLocked = true;
     gs.currentCount++;
     document.getElementById('progress-fill').style.width = `${(gs.currentCount / TOTAL_ITEMS) * 100}%`;
-    
+    updateCounter();
+
     const latency = now - gs.itemSpawnTime;
     if (gs.waitingForReconfig) {
       gs.metrics.reconfigLatency = latency;
@@ -380,20 +1124,43 @@ function handleBinTap(binId) {
     } else {
       gs.metrics.latencies.push(latency);
     }
-    
-    elItem.classList.add('success-pop');
-    setTimeout(spawnNextItem, 300); 
-    
+
+    // Fly animation
+    const { dx, dy } = getBinPosition(binId);
+    elItem.style.setProperty('--fly-x', dx + 'px');
+    elItem.style.setProperty('--fly-y', dy + 'px');
+    elItem.style.setProperty('--fly-x-mid', (dx * 0.3) + 'px');
+    elItem.style.setProperty('--fly-rot', dx > 0 ? '25deg' : '-25deg');
+    elItem.classList.remove('glowing');
+    elItem.classList.add('fly-to-bin');
+
+    // Bin catch bounce
+    binEl.classList.remove('bin-hit', 'bin-catching');
+    void binEl.offsetWidth;
+    binEl.classList.add('bin-catching');
+
+    // Particles + sound
+    spawnParticles(true);
+    sfxSuccess();
+
+    setTimeout(spawnNextItem, 450);
+
   } else {
-    gs.metrics.commission++; 
+    gs.metrics.commission++;
     triggerErrorAnim();
+    spawnParticles(false);
+    sfxError();
   }
 }
 
 function triggerErrorAnim() {
-  elItem.classList.remove('shake-error');
-  void elItem.offsetWidth; 
+  const pulseClass = gs.level === 1
+    ? (gs.currentItem.correctBin === 'dark' ? 'pulse-dark' : 'pulse-light')
+    : 'glowing';
+  elItem.classList.remove('shake-error', 'glowing', 'pulse-dark', 'pulse-light');
+  void elItem.offsetWidth;
   elItem.classList.add('shake-error');
+  setTimeout(() => elItem.classList.add(pulseClass), 600);
 }
 
 function endGame() {
@@ -404,9 +1171,13 @@ function endGame() {
 
   document.getElementById('res-planning').innerText = avgLatency;
   document.getElementById('res-commission').innerText = gs.metrics.commission;
-  document.getElementById('res-reconfig').innerText = gs.metrics.reconfigLatency || 'N/A';
+
+  const reconfigVal = gs.metrics.reconfigLatency;
+  document.getElementById('res-reconfig').innerText = reconfigVal || 'N/A';
+  document.getElementById('reconfig-unit').style.display = reconfigVal ? 'inline' : 'none';
+
   document.getElementById('res-redundant').innerText = gs.metrics.redundant;
-  
+
   showScreen('result-screen');
 }
 </script>
